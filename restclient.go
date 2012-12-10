@@ -6,40 +6,55 @@
 package restclient
 
 import (
-	"net/url"
-	"net/http"
-	"encoding/json"
 	"bytes"
+	"encoding/json"
+	"io/ioutil"
+	"net/http"
+	"net/url"
 )
 
 type RestClient struct {
 	client *http.Client
 }
 
-func (rc *RestClient) Get(u url.URL, Result interface{}) (status int, err error) {
+func (r *RestClient) GetUrl(u *url.URL, result interface{}) (status int, err error) {
+	c := call{
+		Url:    u,
+		Method: "GET",
+		Result: result,
+	}
+	return r.rest(&c)
 }
 
-type restCall struct {
-	Url     url.URL      // Absolute URL to call
+func (r *RestClient) Get(rawurl string, result interface{}) (status int, err error) {
+	u, err := url.Parse(rawurl)
+	if err != nil {
+		return
+	}
+	return r.GetUrl(u, result)
+}
+
+type call struct {
+	Url     *url.URL    // Absolute URL to call
 	Method  string      // HTTP method to use 
 	Content interface{} // Data to JSON-encode and include with call
 	Result  interface{} // JSON-encoded data in respose will be unmarshalled into Result
 }
 
-func rest(r *restCall) (status int, err error) {
-	req, err := http.NewRequest(r.Method, r.Url.String(), nil)
+func (r *RestClient) rest(c *call) (status int, err error) {
+	req, err := http.NewRequest(c.Method, c.Url.String(), nil)
 	if err != nil {
 		return
 	}
-	if r.Content != nil {
-		// log.Println(pretty.Sprintf("Content: %# v", r.Content))
+	if c.Content != nil {
+		// log.Println(pretty.Sprintf("Content: %# v", c.Content))
 		var b []byte
-		b, err = json.Marshal(r.Content)
+		b, err = json.Marshal(c.Content)
 		if err != nil {
 			return
 		}
 		buf := bytes.NewBuffer(b)
-		req, err = http.NewRequest(r.Method, r.Url.String(), buf)
+		req, err = http.NewRequest(c.Method, c.Url.String(), buf)
 		if err != nil {
 			return
 		}
@@ -47,25 +62,14 @@ func rest(r *restCall) (status int, err error) {
 	}
 	req.Header.Add("Accept", "application/json")
 	// log.Println(pretty.Sprintf("Request: %# v", req))
-	resp, err := db.client.Do(req)
+	resp, err := r.client.Do(req)
 	if err != nil {
 		return
 	}
 	status = resp.StatusCode
 	var data []byte
 	data, err = ioutil.ReadAll(resp.Body)
-	// Ignore unmarshall errors - worst case is, r.Result will be nil
-	json.Unmarshal(data, &r.Result)
-	if status < 200 || status >= 300 {
-		res := &r.Result
-		// log.Println(*res)
-		info, ok := (*res).(neoError)
-		if ok {
-			log.Println("Got error response code:", status)
-			log.Println(info.Mesage)
-			log.Println(info.Exception)
-			log.Println(info.StackTrace)
-		}
-	}
+	// Ignore unmarshall errors - worst case is, c.Result will be nil
+	err = json.Unmarshal(data, &c.Result)
 	return
 }
