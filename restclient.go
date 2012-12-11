@@ -71,16 +71,15 @@ func (c *Client) Do(r *RestRequest) (status int, err error) {
 	m := string(r.Method)
 	var req *http.Request
 	if r.Data == nil {
-		req, err = http.NewRequest(m, r.Url, nil)
+		req, err = http.NewRequest(m, u.String(), nil)
 	} else {
-		// log.Println(pretty.Sprintf("Content: %# v", r.Content))
 		var b []byte
 		b, err = json.Marshal(r.Data)
 		if err != nil { // Create a URL object from the raw url string.  This will allow us to compose URL parameters programmatically and be
 			return
 		}
 		buf := bytes.NewBuffer(b)
-		req, err = http.NewRequest(m, r.Url, buf)
+		req, err = http.NewRequest(m, u.String(), buf)
 		req.Header.Add("Content-Type", "application/json")
 	}
 	if err != nil {
@@ -92,7 +91,6 @@ func (c *Client) Do(r *RestRequest) (status int, err error) {
 	if req.Header.Get("Accept") == "" {
 		req.Header.Add("Accept", "application/json")
 	}
-	// log.Println(pretty.Sprintf("Request: %# v", req))
 	//
 	// Execute the HTTP request
 	//
@@ -104,5 +102,14 @@ func (c *Client) Do(r *RestRequest) (status int, err error) {
 	var data []byte
 	data, err = ioutil.ReadAll(resp.Body)
 	err = json.Unmarshal(data, &r.Result)
+	//
+	// Is the below a good idea??
+	//
+	if err != nil {
+		// Try again with generic interface{} as result object
+		r.Result = new(interface{})
+		err = json.Unmarshal(data, &r.Result)
+		return
+	}
 	return
 }
