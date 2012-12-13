@@ -41,8 +41,8 @@ type Client struct {
 }
 
 // New returns a new Client instance.
-func New() Client {
-	return Client{
+func New() *Client {
+	return &Client{
 		HttpClient: new(http.Client),
 	}
 }
