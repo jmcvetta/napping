@@ -14,6 +14,7 @@ import (
 	// "sort"
 	"encoding/json"
 	"net/http"
+	// "io/ioutil"
 	//	"net/url"
 	"testing"
 )
@@ -22,16 +23,16 @@ const (
 	port = "9000"
 )
 
-type responseStruct struct {
+type structType struct {
 	Foo map[string]string
 	Bar int
 	Baz string
 }
 
 var (
-	standardMap      = map[string]string{"foo": "bar"}
-	standardResponse = responseStruct{
-		Foo: standardMap,
+	fooMap    = map[string]string{"foo": "bar"}
+	fooStruct = structType{
+		Foo: fooMap,
 		Bar: 222,
 		Baz: "baz",
 	}
@@ -61,8 +62,8 @@ func HandleGET(w http.ResponseWriter, req *http.Request) {
 	u := req.URL
 	q := u.Query()
 	log.Println(q)
-	for k, _ := range standardMap {
-		if standardMap[k] != q.Get(k) {
+	for k, _ := range fooMap {
+		if fooMap[k] != q.Get(k) {
 			msg := "Bad query params: " + u.Query().Encode()
 			http.Error(w, msg, http.StatusInternalServerError)
 			return
@@ -71,7 +72,7 @@ func HandleGET(w http.ResponseWriter, req *http.Request) {
 	//
 	// Generate response
 	//
-	blob, err := json.Marshal(standardResponse)
+	blob, err := json.Marshal(fooStruct)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -81,7 +82,7 @@ func HandleGET(w http.ResponseWriter, req *http.Request) {
 }
 
 /*
-func PostResponder(w http.ResponseWriter, req *http.Request) {
+func HandlePOST(w http.ResponseWriter, req *http.Request) {
 	//
 	// Parse Payload
 	//
@@ -131,19 +132,19 @@ func PostResponder(w http.ResponseWriter, req *http.Request) {
 }
 */
 
-func TestGet(t *testing.T) {
+func TestGET(t *testing.T) {
 	c := New()
 	r := RestRequest{
 		Url:    "http://localhost:" + port,
 		Method: GET,
-		// Params: standardMap,
-		Params: map[string]string{"foo": "foo"},
-		Result: new(responseStruct),
+		Params: fooMap,
+		// Params: map[string]string{"bad": "value"},
+		Result: new(structType),
 	}
 	status, err := c.Do(&r)
 	if err != nil {
 		t.Error(err)
 	}
-	log.Println(r.Result)
 	assert.Equal(t, status, 200)
+	assert.Equal(t, r.Result, &fooStruct)
 }
