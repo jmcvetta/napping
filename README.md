@@ -11,8 +11,8 @@ Work in progress; not ready for general use.
 
 ## Documentation
 
-See [GoPkgDoc](http://go.pkgdoc.org/github.com/jmcvetta/restclient) for
-automatically generated documentation.
+See GoDoc for [automatically generated
+documentation](http://go.pkgdoc.org/github.com/jmcvetta/restclient).
 
 
 ## License
