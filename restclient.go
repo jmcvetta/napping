@@ -6,7 +6,9 @@
 package restclient
 
 import (
+	// "log"
 	"bytes"
+	// "reflect"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -101,15 +103,19 @@ func (c *Client) Do(r *RestRequest) (status int, err error) {
 	status = resp.StatusCode
 	var data []byte
 	data, err = ioutil.ReadAll(resp.Body)
-	err = json.Unmarshal(data, &r.Result)
+	if err != nil {
+		return
+	}
+	unmarshErr := json.Unmarshal(data, &r.Result)
 	//
 	// Is the below a good idea??
 	//
-	if err != nil {
-		// Try again with generic interface{} as result object
+	if unmarshErr != nil {
 		r.Result = new(interface{})
-		err = json.Unmarshal(data, &r.Result)
-		return
+		unmarshErr = json.Unmarshal(data, &r.Result)
+		if unmarshErr != nil {
+			r.Result = string(data)
+		}
 	}
 	return
 }
