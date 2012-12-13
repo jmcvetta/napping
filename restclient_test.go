@@ -13,8 +13,8 @@ import (
 	"log"
 	// "sort"
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
-	// "io/ioutil"
 	//	"net/url"
 	"testing"
 )
@@ -24,17 +24,20 @@ const (
 )
 
 type structType struct {
-	Foo map[string]string
-	Bar int
-	Baz string
+	Foo int
+	Bar string
 }
 
 var (
 	fooMap    = map[string]string{"foo": "bar"}
+	barMap    = map[string]string{"bar": "baz"}
 	fooStruct = structType{
-		Foo: fooMap,
-		Bar: 222,
-		Baz: "baz",
+		Foo: 111,
+		Bar: "foo",
+	}
+	barStruct = structType{
+		Foo: 222,
+		Bar: "bar",
 	}
 )
 
@@ -45,6 +48,7 @@ func init() {
 	//
 	mux := pat.New()
 	mux.Get("/", http.HandlerFunc(HandleGET))
+	mux.Post("/", http.HandlerFunc(HandlePOST))
 	//
 	// Start webserver
 	//
@@ -72,7 +76,7 @@ func HandleGET(w http.ResponseWriter, req *http.Request) {
 	//
 	// Generate response
 	//
-	blob, err := json.Marshal(fooStruct)
+	blob, err := json.Marshal(barStruct)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -81,7 +85,6 @@ func HandleGET(w http.ResponseWriter, req *http.Request) {
 	w.Write(blob)
 }
 
-/*
 func HandlePOST(w http.ResponseWriter, req *http.Request) {
 	//
 	// Parse Payload
@@ -96,22 +99,13 @@ func HandlePOST(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	var greq GetRequest
-	err = json.Unmarshal(body, &greq)
+	var s structType
+	err = json.Unmarshal(body, &s)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	valid := true
-	switch true {
-	case greq.Foo != "foo":
-		valid = false
-	case greq.Bar != fooBarMap:
-		valid = false
-	case greq.Baz != 111:
-		valid = false
-	}
-	if valid == false {
+	if s != fooStruct {
 		msg := "Bad request body"
 		http.Error(w, msg, http.StatusBadRequest)
 		return
@@ -122,7 +116,7 @@ func HandlePOST(w http.ResponseWriter, req *http.Request) {
 	//
 	// Generate response
 	//
-	blob, err := json.Marshal(gresp)
+	blob, err := json.Marshal(barStruct)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -130,7 +124,6 @@ func HandlePOST(w http.ResponseWriter, req *http.Request) {
 	req.Header.Add("content-type", "application/json")
 	w.Write(blob)
 }
-*/
 
 func TestGET(t *testing.T) {
 	c := New()
@@ -146,5 +139,21 @@ func TestGET(t *testing.T) {
 		t.Error(err)
 	}
 	assert.Equal(t, status, 200)
-	assert.Equal(t, r.Result, &fooStruct)
+	assert.Equal(t, r.Result, &barStruct)
+}
+
+func TestPOST(t *testing.T) {
+	c := New()
+	r := RestRequest{
+		Url:    "http://localhost:" + port,
+		Method: POST,
+		Data:   fooStruct,
+		Result: new(structType),
+	}
+	status, err := c.Do(&r)
+	if err != nil {
+		t.Error(err)
+	}
+	assert.Equal(t, status, 200)
+	assert.Equal(t, r.Result, &barStruct)
 }
