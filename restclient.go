@@ -31,6 +31,8 @@ type RestRequest struct {
 	Headers *http.Header      // HTTP Headers to use (will override defaults)
 	Data    interface{}       // Data to JSON-encode and include with call
 	Result  interface{}       // JSON-encoded data in respose will be unmarshalled into Result
+	Error   interface{}       // If server returns error status, JSON-encoded response data will be unmarshalled into Error
+	RawText string            // Gets populated with raw text of server response
 }
 
 // Client is a REST client.
@@ -106,16 +108,11 @@ func (c *Client) Do(r *RestRequest) (status int, err error) {
 	if err != nil {
 		return
 	}
-	unmarshErr := json.Unmarshal(data, &r.Result)
-	//
-	// Is the below a good idea??
-	//
-	if unmarshErr != nil {
-		r.Result = new(interface{})
-		unmarshErr = json.Unmarshal(data, &r.Result)
-		if unmarshErr != nil {
-			r.Result = string(data)
-		}
+	r.RawText = string(data)
+	if status >= 200 && status < 300 {
+		err = json.Unmarshal(data, &r.Result)
+	} else {
+		err = json.Unmarshal(data, &r.Error)
 	}
 	return
 }
