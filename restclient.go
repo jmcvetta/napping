@@ -6,8 +6,8 @@
 package restclient
 
 import (
-	// "log"
 	"bytes"
+	"log"
 	// "reflect"
 	"encoding/json"
 	"io/ioutil"
@@ -47,7 +47,7 @@ func New() *Client {
 	}
 }
 
-// Do executes an HTTP REST request
+// Do executes a REST request.
 func (c *Client) Do(r *RestRequest) (status int, err error) {
 	//
 	// Create a URL object from the raw url string.  This will allow us to compose
@@ -55,6 +55,7 @@ func (c *Client) Do(r *RestRequest) (status int, err error) {
 	//
 	u, err := url.Parse(r.Url)
 	if err != nil {
+		log.Println(err)
 		return
 	}
 	//
@@ -79,7 +80,8 @@ func (c *Client) Do(r *RestRequest) (status int, err error) {
 	} else {
 		var b []byte
 		b, err = json.Marshal(r.Data)
-		if err != nil { // Create a URL object from the raw url string.  This will allow us to compose URL parameters programmatically and be
+		if err != nil {
+			log.Println(err)
 			return
 		}
 		buf := bytes.NewBuffer(b)
@@ -87,6 +89,7 @@ func (c *Client) Do(r *RestRequest) (status int, err error) {
 		req.Header.Add("Content-Type", "application/json")
 	}
 	if err != nil {
+		log.Println(err)
 		return
 	}
 	//
@@ -100,19 +103,30 @@ func (c *Client) Do(r *RestRequest) (status int, err error) {
 	//
 	resp, err := c.HttpClient.Do(req)
 	if err != nil {
+		log.Println(err)
 		return
 	}
 	status = resp.StatusCode
 	var data []byte
 	data, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
+		log.Println(err)
 		return
 	}
 	r.RawText = string(data)
+	// If server returned no data, don't bother trying to unmarshall it (which will fail anyways).
+	if r.RawText == "" {
+		return
+	}
 	if status >= 200 && status < 300 {
 		err = json.Unmarshal(data, &r.Result)
 	} else {
 		err = json.Unmarshal(data, &r.Error)
+	}
+	if err != nil {
+		log.Println(status)
+		log.Println(err)
+		log.Println(r.RawText)
 	}
 	return
 }
