@@ -52,8 +52,9 @@ func init() {
 	// Routing
 	//
 	mux := pat.New()
-	mux.Get("/", http.HandlerFunc(HandleGET))
-	mux.Post("/", http.HandlerFunc(HandlePOST))
+	mux.Get("/", http.HandlerFunc(HandleGet))
+	mux.Post("/", http.HandlerFunc(HandlePost))
+	mux.Put("/", http.HandlerFunc(HandlePut))
 	//
 	// Start webserver
 	//
@@ -80,7 +81,7 @@ func JsonError(w http.ResponseWriter, msg string, code int) {
 	http.Error(w, string(blob), code)
 }
 
-func HandleGET(w http.ResponseWriter, req *http.Request) {
+func HandleGet(w http.ResponseWriter, req *http.Request) {
 	u := req.URL
 	q := u.Query()
 	for k, _ := range fooMap {
@@ -101,8 +102,7 @@ func HandleGET(w http.ResponseWriter, req *http.Request) {
 	req.Header.Add("content-type", "application/json")
 	w.Write(blob)
 }
-
-func HandlePOST(w http.ResponseWriter, req *http.Request) {
+func HandlePost(w http.ResponseWriter, req *http.Request) {
 	//
 	// Parse Payload
 	//
@@ -130,9 +130,6 @@ func HandlePOST(w http.ResponseWriter, req *http.Request) {
 	//
 	// Compose Response
 	//
-	//
-	// Generate response
-	//
 	blob, err := json.Marshal(barStruct)
 	if err != nil {
 		JsonError(w, err.Error(), http.StatusInternalServerError)
@@ -142,7 +139,36 @@ func HandlePOST(w http.ResponseWriter, req *http.Request) {
 	w.Write(blob)
 }
 
-func TestGET(t *testing.T) {
+
+func HandlePut(w http.ResponseWriter, req *http.Request) {
+	//
+	// Parse Payload
+	//
+	if req.ContentLength <= 0 {
+		msg := "Content-Length must be greater than 0."
+		JsonError(w, msg, http.StatusLengthRequired)
+		return
+	}
+	body, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		JsonError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	var s structType
+	err = json.Unmarshal(body, &s)
+	if err != nil {
+		JsonError(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	if s != fooStruct {
+		msg := "Bad request body"
+		JsonError(w, msg, http.StatusBadRequest)
+		return
+	}
+	return
+}
+
+func TestGet(t *testing.T) {
 	// 
 	// Good request
 	//
@@ -183,7 +209,7 @@ func TestGET(t *testing.T) {
 	assert.Equal(t, *e, expected)
 }
 
-func TestPOST(t *testing.T) {
+func TestPost(t *testing.T) {
 	c := New()
 	r := RestRequest{
 		Url:    "http://localhost:" + port,
@@ -197,4 +223,21 @@ func TestPOST(t *testing.T) {
 	}
 	assert.Equal(t, status, 200)
 	assert.Equal(t, r.Result, &barStruct)
+}
+
+func TestPut(t *testing.T) {
+	c := New()
+	r := RestRequest{
+		Url:    "http://localhost:" + port,
+		Method: PUT,
+		Data:   fooStruct,
+		Result: new(structType),
+	}
+	status, err := c.Do(&r)
+	if err != nil {
+		t.Error(err)
+	}
+	assert.Equal(t, status, 200)
+	// Server should return NO data
+	assert.Equal(t, r.RawText, "")
 }
