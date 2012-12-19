@@ -8,14 +8,12 @@
 package restclient
 
 import (
-	"github.com/bmizerany/assert"
-	"github.com/bmizerany/pat"
-	"log"
-	// "sort"
 	"encoding/json"
+	"github.com/bmizerany/assert"
 	"io/ioutil"
+	"log"
 	"net/http"
-	//	"net/url"
+	"net/http/httptest"
 	"testing"
 )
 
@@ -48,24 +46,26 @@ var (
 
 func init() {
 	log.SetFlags(log.Ltime | log.Lshortfile)
-	// 
-	// Routing
-	//
-	mux := pat.New()
-	mux.Get("/", http.HandlerFunc(HandleGet))
-	mux.Post("/", http.HandlerFunc(HandlePost))
-	mux.Put("/", http.HandlerFunc(HandlePut))
-	//
-	// Start webserver
-	//
-	http.Handle("/", mux)
-	go func() {
-		log.Println("Starting webserver on port " + port + "...")
-		err := http.ListenAndServe(":"+port, nil)
-		if err != nil {
-			log.Panicln(err)
-		}
-	}()
+	/*
+		// 
+		// Routing
+		//
+		mux := pat.New()
+		mux.Get("/", http.HandlerFunc(HandleGet))
+		mux.Post("/", http.HandlerFunc(HandlePost))
+		mux.Put("/", http.HandlerFunc(HandlePut))
+		//
+		// Start webserver
+		//
+		http.Handle("/", mux)
+		go func() {
+			log.Println("Starting webserver on port " + port + "...")
+			err := http.ListenAndServe(":"+port, nil)
+			if err != nil {
+				log.Panicln(err)
+			}
+		}()
+	*/
 }
 
 func JsonError(w http.ResponseWriter, msg string, code int) {
@@ -139,7 +139,6 @@ func HandlePost(w http.ResponseWriter, req *http.Request) {
 	w.Write(blob)
 }
 
-
 func HandlePut(w http.ResponseWriter, req *http.Request) {
 	//
 	// Parse Payload
@@ -169,18 +168,20 @@ func HandlePut(w http.ResponseWriter, req *http.Request) {
 }
 
 func TestGet(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(HandleGet))
+	defer srv.Close()
 	// 
 	// Good request
 	//
-	c := New()
+	client := New()
 	r := RestRequest{
-		Url:    "http://localhost:" + port,
+		Url:    "http://" + srv.Listener.Addr().String(),
 		Method: GET,
 		Params: fooMap,
 		// Params: map[string]string{"bad": "value"},
 		Result: new(structType),
 	}
-	status, err := c.Do(&r)
+	status, err := client.Do(&r)
 	if err != nil {
 		t.Error(err)
 	}
@@ -189,14 +190,14 @@ func TestGet(t *testing.T) {
 	// 
 	// Bad request
 	//
-	c = New()
+	client = New()
 	r = RestRequest{
-		Url:    "http://localhost:" + port,
+		Url:    "http://" + srv.Listener.Addr().String(),
 		Method: GET,
 		Params: map[string]string{"bad": "value"},
 		Error:  new(errorStruct),
 	}
-	status, err = c.Do(&r)
+	status, err = client.Do(&r)
 	if err != nil {
 		t.Error(err)
 	}
@@ -210,14 +211,16 @@ func TestGet(t *testing.T) {
 }
 
 func TestPost(t *testing.T) {
-	c := New()
+	srv := httptest.NewServer(http.HandlerFunc(HandlePost))
+	defer srv.Close()
+	client := New()
 	r := RestRequest{
-		Url:    "http://localhost:" + port,
+		Url:    "http://" + srv.Listener.Addr().String(),
 		Method: POST,
 		Data:   fooStruct,
 		Result: new(structType),
 	}
-	status, err := c.Do(&r)
+	status, err := client.Do(&r)
 	if err != nil {
 		t.Error(err)
 	}
@@ -226,14 +229,16 @@ func TestPost(t *testing.T) {
 }
 
 func TestPut(t *testing.T) {
-	c := New()
+	srv := httptest.NewServer(http.HandlerFunc(HandlePut))
+	defer srv.Close()
+	client := New()
 	r := RestRequest{
-		Url:    "http://localhost:" + port,
+		Url:    "http://" + srv.Listener.Addr().String(),
 		Method: PUT,
 		Data:   fooStruct,
 		Result: new(structType),
 	}
-	status, err := c.Do(&r)
+	status, err := client.Do(&r)
 	if err != nil {
 		t.Error(err)
 	}
