@@ -17,10 +17,6 @@ import (
 	"testing"
 )
 
-const (
-	port = "9000"
-)
-
 type structType struct {
 	Foo int
 	Bar string
