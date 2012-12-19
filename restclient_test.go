@@ -42,26 +42,6 @@ var (
 
 func init() {
 	log.SetFlags(log.Ltime | log.Lshortfile)
-	/*
-		// 
-		// Routing
-		//
-		mux := pat.New()
-		mux.Get("/", http.HandlerFunc(HandleGet))
-		mux.Post("/", http.HandlerFunc(HandlePost))
-		mux.Put("/", http.HandlerFunc(HandlePut))
-		//
-		// Start webserver
-		//
-		http.Handle("/", mux)
-		go func() {
-			log.Println("Starting webserver on port " + port + "...")
-			err := http.ListenAndServe(":"+port, nil)
-			if err != nil {
-				log.Panicln(err)
-			}
-		}()
-	*/
 }
 
 func JsonError(w http.ResponseWriter, msg string, code int) {
