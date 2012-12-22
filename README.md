@@ -6,13 +6,15 @@ APIs.
 
 ## Status
 
-Work in progress; not ready for general use.
+Work in progress.  Possibly useful, but still very alpha and subject to
+possible API changes.  Currently being used by, and developed in conjunction
+with, package [neo4j](https://github.com/jmcvetta/neo4j).
 
 
 ## Documentation
 
-See [GoPkgDoc](http://go.pkgdoc.org/github.com/jmcvetta/restclient) for
-automatically generated documentation.
+See [GoDoc](http://godoc.org/github.com/jmcvetta/restclient) for automatically
+generated documentation.
 
 
 ## License
