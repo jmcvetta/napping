@@ -7,13 +7,13 @@ package restclient
 
 import (
 	"bytes"
-	"log"
-	"runtime"
-	"strconv"
 	"encoding/json"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
+	"runtime"
+	"strconv"
 )
 
 type Method string
@@ -34,12 +34,12 @@ type RestRequest struct {
 	Result  interface{}       // JSON-encoded data in respose will be unmarshalled into Result
 	Error   interface{}       // If server returns error status, JSON-encoded response data will be unmarshalled into Error
 	RawText string            // Gets populated with raw text of server response
-	Status	int  // HTTP status for executed request
+	Status  int               // HTTP status for executed request
 }
 
 // Client is a REST client.
 type Client struct {
-	HttpClient *http.Client
+	HttpClient   *http.Client
 	DefaultError interface{}
 }
 
@@ -133,9 +133,9 @@ func (c *Client) Do(r *RestRequest) (status int, err error) {
 		return
 	}
 	if status >= 200 && status < 300 {
-		err = json.Unmarshal(data, &r.Result)
+		err = c.unmarshal(data, &r.Result)
 	} else {
-		err = json.Unmarshal(data, &r.Error)
+		err = c.unmarshal(data, &r.Error)
 	}
 	if err != nil {
 		log.Println(status)
@@ -143,4 +143,16 @@ func (c *Client) Do(r *RestRequest) (status int, err error) {
 		log.Println(r.RawText)
 	}
 	return
+}
+
+// unmarshal parses the JSON-encoded data and stores the result in the value
+// pointed to by v.  If the data cannot be unmarshalled without error, v will be 
+// reassigned the value interface{}, and data unmarshalled into that.
+func (c *Client) unmarshal(data []byte, v interface{}) error {
+	err := json.Unmarshal(data, v)
+	if err == nil {
+		return nil
+	}
+	v = new(interface{})
+	return json.Unmarshal(data, v)
 }
