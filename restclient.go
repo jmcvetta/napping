@@ -33,11 +33,13 @@ type RestRequest struct {
 	Result  interface{}       // JSON-encoded data in respose will be unmarshalled into Result
 	Error   interface{}       // If server returns error status, JSON-encoded response data will be unmarshalled into Error
 	RawText string            // Gets populated with raw text of server response
+	Status	int  // HTTP status for executed request
 }
 
 // Client is a REST client.
 type Client struct {
 	HttpClient *http.Client
+	DefaultError interface{}
 }
 
 // New returns a new Client instance.
@@ -49,6 +51,9 @@ func New() *Client {
 
 // Do executes a REST request.
 func (c *Client) Do(r *RestRequest) (status int, err error) {
+	if r.Error == nil {
+		r.Error = c.DefaultError
+	}
 	//
 	// Create a URL object from the raw url string.  This will allow us to compose
 	// query parameters programmatically and be guaranteed of a well-formed URL.
@@ -107,6 +112,7 @@ func (c *Client) Do(r *RestRequest) (status int, err error) {
 		return
 	}
 	status = resp.StatusCode
+	r.Status = resp.StatusCode
 	var data []byte
 	data, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
