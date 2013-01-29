@@ -8,7 +8,8 @@ package restclient
 import (
 	"bytes"
 	"log"
-	// "reflect"
+	"runtime"
+	"strconv"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -108,7 +109,14 @@ func (c *Client) Do(r *RestRequest) (status int, err error) {
 	//
 	resp, err := c.HttpClient.Do(req)
 	if err != nil {
-		log.Println(err)
+		_, file, line, ok := runtime.Caller(1)
+		if !ok {
+			file = "???"
+			line = 0
+		}
+		lineNo := strconv.Itoa(line)
+		s := "Error executing REST request, called from " + file + ":" + lineNo + ": "
+		log.Println(s, err)
 		return
 	}
 	status = resp.StatusCode
