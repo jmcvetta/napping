@@ -109,22 +109,14 @@ func (c *Client) Do(r *RestRequest) (status int, err error) {
 	//
 	resp, err := c.HttpClient.Do(req)
 	if err != nil {
-		_, file, line, ok := runtime.Caller(1)
-		if !ok {
-			file = "???"
-			line = 0
-		}
-		lineNo := strconv.Itoa(line)
-		s := "Error executing REST request, called from " + file + ":" + lineNo + ": "
-		log.Println(s, err)
-		return
+		complain(err, status, "")
 	}
 	status = resp.StatusCode
 	r.Status = resp.StatusCode
 	var data []byte
 	data, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Println(err)
+		complain(err, status, string(data))
 		return
 	}
 	r.RawText = string(data)
@@ -155,4 +147,22 @@ func (c *Client) unmarshal(data []byte, v interface{}) error {
 	}
 	v = new(interface{})
 	return json.Unmarshal(data, v)
+}
+
+// complain prints detailed error messages to the log.
+func complain(err error, status int, rawtext string) {
+	_, file, line, ok := runtime.Caller(2)
+	if !ok {
+		file = "???"
+		line = 0
+	}
+	lineNo := strconv.Itoa(line)
+	s := "Error executing REST request:\n"
+	s += "    --> Called from " + file + ":" + lineNo + "\n"
+	s += "    --> Got status " + strconv.Itoa(status) + "\n"
+	if rawtext != "" {
+		s += "    --> Raw text of server response: " + rawtext + "\n"
+	}
+	s += "    --> " + err.Error()
+	log.Println(s)
 }
