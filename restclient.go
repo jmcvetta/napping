@@ -16,6 +16,7 @@ import (
 	"strconv"
 )
 
+// A Method is an HTTP verb.
 type Method string
 
 var (
@@ -25,6 +26,8 @@ var (
 	DELETE = Method("DELETE")
 )
 
+// A RestRequest describes an HTTP request to be executed, and the data
+// structures into which results and errors will be unmarshalled.
 type RestRequest struct {
 	Url     string            // Raw URL string
 	Method  Method            // HTTP method to use 
@@ -165,4 +168,13 @@ func complain(err error, status int, rawtext string) {
 	}
 	s += "    --> " + err.Error()
 	log.Println(s)
+}
+
+var (
+	defaultClient = New()
+)
+
+// Do executes a REST request using the default client.
+func Do(r *RestRequest) (status int, err error) {
+	return defaultClient.Do(r)
 }
