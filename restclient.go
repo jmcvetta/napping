@@ -29,15 +29,16 @@ var (
 // A RestRequest describes an HTTP request to be executed, and the data
 // structures into which results and errors will be unmarshalled.
 type RestRequest struct {
-	Url     string            // Raw URL string
-	Method  Method            // HTTP method to use 
-	Params  map[string]string // URL parameters for GET requests (ignored otherwise)
-	Headers *http.Header      // HTTP Headers to use (will override defaults)
-	Data    interface{}       // Data to JSON-encode and include with call
-	Result  interface{}       // JSON-encoded data in respose will be unmarshalled into Result
-	Error   interface{}       // If server returns error status, JSON-encoded response data will be unmarshalled into Error
-	RawText string            // Gets populated with raw text of server response
-	Status  int               // HTTP status for executed request
+	Url      string            // Raw URL string
+	Method   Method            // HTTP method to use 
+	Userinfo *url.Userinfo     // Optional username/password to authenticate this request
+	Params   map[string]string // URL parameters for GET requests (ignored otherwise)
+	Headers  *http.Header      // HTTP Headers to use (will override defaults)
+	Data     interface{}       // Data to JSON-encode and include with call
+	Result   interface{}       // JSON-encoded data in respose will be unmarshalled into Result
+	Error    interface{}       // If server returns error status, JSON-encoded response data will be unmarshalled into Error
+	RawText  string            // Gets populated with raw text of server response
+	Status   int               // HTTP status for executed request
 }
 
 // Client is a REST client.
@@ -108,6 +109,13 @@ func (c *Client) Do(r *RestRequest) (status int, err error) {
 		req.Header.Add("Accept", "application/json")
 	}
 	//
+	// Set HTTP Basic authentication if userinfo is supplied
+	//
+	if r.Userinfo != nil {
+		pwd, _ := r.Userinfo.Password()
+		req.SetBasicAuth(r.Userinfo.Username(), pwd)
+	}
+	//
 	// Execute the HTTP request
 	//
 	resp, err := c.HttpClient.Do(req)
@@ -136,6 +144,8 @@ func (c *Client) Do(r *RestRequest) (status int, err error) {
 		log.Println(status)
 		log.Println(err)
 		log.Println(r.RawText)
+		log.Println(resp)
+		log.Println(resp.Request)
 	}
 	return
 }
