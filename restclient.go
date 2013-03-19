@@ -121,6 +121,7 @@ func (c *Client) Do(r *RestRequest) (status int, err error) {
 	resp, err := c.HttpClient.Do(req)
 	if err != nil {
 		complain(err, status, "")
+		return
 	}
 	status = resp.StatusCode
 	r.Status = resp.StatusCode
