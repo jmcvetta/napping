@@ -57,7 +57,6 @@ type RequestResponse struct {
 // Client is a REST client.
 type Client struct {
 	HttpClient   *http.Client
-	DefaultError interface{}
 }
 
 // New returns a new Client instance.
@@ -69,9 +68,6 @@ func New() *Client {
 
 // Do executes a REST request.
 func (c *Client) Do(r *RequestResponse) (status int, err error) {
-	if r.Error == nil {
-		r.Error = c.DefaultError
-	}
 	//
 	// Create a URL object from the raw url string.  This will allow us to compose
 	// query parameters programmatically and be guaranteed of a well-formed URL.
