@@ -39,8 +39,9 @@ type RequestResponse struct {
 	Params   map[string]string // URL parameters for GET requests (ignored otherwise)
 	Headers  *http.Header      // HTTP Headers to use (will override defaults)
 	//
-	// The following interfaces values should be populated with *pointers* to
-	// data structures.
+	// The following interfaces fields should be populated with *pointers* to
+	// data structures.  Any structure that can be (un)marshalled by the json
+	// package can be used.
 	//
 	Data   interface{} // Data to JSON-encode and POST
 	Result interface{} // Successful response is unmarshalled into Result
