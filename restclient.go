@@ -14,6 +14,7 @@ import (
 	"net/url"
 	"runtime"
 	"strconv"
+	"time"
 )
 
 // A Method is an HTTP verb.
@@ -43,6 +44,7 @@ type RequestResponse struct {
 	//
 	// The following fields are populated by Client.Do()
 	//
+	Timestamp time.Time
 	RawText   string // Gets populated with raw text of server response
 	Status    int    // HTTP status for executed request
 }
@@ -89,6 +91,7 @@ func (c *Client) Do(r *RequestResponse) (status int, err error) {
 	// Create a Request object; if populated, Data field is JSON encoded as request
 	// body
 	//
+	r.Timestamp = time.Now()
 	m := string(r.Method)
 	var req *http.Request
 	if r.Data == nil {
