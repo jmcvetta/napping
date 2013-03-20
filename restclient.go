@@ -44,9 +44,9 @@ type RequestResponse struct {
 	//
 	// The following fields are populated by Client.Do()
 	//
-	Timestamp time.Time
-	RawText   string // Gets populated with raw text of server response
-	Status    int    // HTTP status for executed request
+	Timestamp time.Time // Time when HTTP request was sent
+	RawText   string    // Gets populated with raw text of server response
+	Status    int       // HTTP status for executed request
 }
 
 // Client is a REST client.
