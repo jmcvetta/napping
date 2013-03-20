@@ -38,14 +38,18 @@ type RequestResponse struct {
 	Userinfo *url.Userinfo     // Optional username/password to authenticate this request
 	Params   map[string]string // URL parameters for GET requests (ignored otherwise)
 	Headers  *http.Header      // HTTP Headers to use (will override defaults)
-	Data     interface{}       // Data to JSON-encode and include with call
-	Result   interface{}       // JSON-encoded data in respose will be unmarshalled into Result
-	Error    interface{}       // If server returns error status, JSON-encoded response data will be unmarshalled into Error
+	//
+	// The following interfaces values should be populated with *pointers* to
+	// data structures.
+	//
+	Data   interface{} // Data to JSON-encode and POST
+	Result interface{} // Successful response is unmarshalled into Result
+	Error  interface{} // Error response is unmarshalled into Error
 	//
 	// The following fields are populated by Client.Do()
 	//
 	Timestamp time.Time // Time when HTTP request was sent
-	RawText   string    // Gets populated with raw text of server response
+	RawText   string    // Raw text of server response (JSON or otherwise)
 	Status    int       // HTTP status for executed request
 }
 
