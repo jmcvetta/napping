@@ -150,7 +150,7 @@ func TestGet(t *testing.T) {
 	// Good request
 	//
 	client := New()
-	r := RestRequest{
+	r := RequestResponse{
 		Url:    "http://" + srv.Listener.Addr().String(),
 		Method: GET,
 		Params: fooMap,
@@ -167,7 +167,7 @@ func TestGet(t *testing.T) {
 	// Bad request
 	//
 	client = New()
-	r = RestRequest{
+	r = RequestResponse{
 		Url:    "http://" + srv.Listener.Addr().String(),
 		Method: GET,
 		Params: map[string]string{"bad": "value"},
@@ -190,7 +190,7 @@ func TestPost(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(HandlePost))
 	defer srv.Close()
 	client := New()
-	r := RestRequest{
+	r := RequestResponse{
 		Url:    "http://" + srv.Listener.Addr().String(),
 		Method: POST,
 		Data:   fooStruct,
@@ -208,7 +208,7 @@ func TestPut(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(HandlePut))
 	defer srv.Close()
 	client := New()
-	r := RestRequest{
+	r := RequestResponse{
 		Url:    "http://" + srv.Listener.Addr().String(),
 		Method: PUT,
 		Data:   fooStruct,

@@ -26,9 +26,12 @@ var (
 	DELETE = Method("DELETE")
 )
 
-// A RestRequest describes an HTTP request to be executed, and the data
-// structures into which results and errors will be unmarshalled.
-type RestRequest struct {
+// A RequestResponse describes an HTTP request to be executed, data
+// structures into which results and errors will be unmarshalled, and the
+// server's response.  By using a single object for both the request and the
+// response we allow easy access to Result and Error objects without needing
+// type assertions.
+type RequestResponse struct {
 	Url      string            // Raw URL string
 	Method   Method            // HTTP method to use 
 	Userinfo *url.Userinfo     // Optional username/password to authenticate this request
@@ -37,8 +40,11 @@ type RestRequest struct {
 	Data     interface{}       // Data to JSON-encode and include with call
 	Result   interface{}       // JSON-encoded data in respose will be unmarshalled into Result
 	Error    interface{}       // If server returns error status, JSON-encoded response data will be unmarshalled into Error
-	RawText  string            // Gets populated with raw text of server response
-	Status   int               // HTTP status for executed request
+	//
+	// The following fields are populated by Client.Do()
+	//
+	RawText   string // Gets populated with raw text of server response
+	Status    int    // HTTP status for executed request
 }
 
 // Client is a REST client.
@@ -55,7 +61,7 @@ func New() *Client {
 }
 
 // Do executes a REST request.
-func (c *Client) Do(r *RestRequest) (status int, err error) {
+func (c *Client) Do(r *RequestResponse) (status int, err error) {
 	if r.Error == nil {
 		r.Error = c.DefaultError
 	}
@@ -186,6 +192,6 @@ var (
 )
 
 // Do executes a REST request using the default client.
-func Do(r *RestRequest) (status int, err error) {
+func Do(r *RequestResponse) (status int, err error) {
 	return defaultClient.Do(r)
 }
