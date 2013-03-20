@@ -17,8 +17,8 @@ Example:
 	}
 	s := Spam{}
 	r := restclient.RequestResponse{
-		Url:    "http://" + srv.Listener.Addr().String(),
-		Method: POST,
+		Url:    "http://foo.com/bar",
+		Method: restclient.POST,
 		Data:   &f,
 		Result: &s,
 	}
