@@ -6,9 +6,11 @@ APIs.
 
 ## Status
 
-Work in progress.  Possibly useful, but still very alpha and subject to
-possible API changes.  Currently being used by, and developed in conjunction
-with, package [neo4j](https://github.com/jmcvetta/neo4j).
+Possibly useful, but still fairly beta and possibly subject to possible API
+changes.  Currently being used by, and developed in conjunction with, package
+[neo4j](https://github.com/jmcvetta/neo4j).
+
+[![Build Status](https://drone.io/github.com/jmcvetta/restclient/status.png)](https://drone.io/github.com/jmcvetta/restclient/latest)
 
 
 ## Documentation
