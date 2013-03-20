@@ -1,8 +1,29 @@
 // Copyright (c) 2012 Jason McVetta.  This is Free Software, released under the 
 // terms of the GPL v3.  See http://www.gnu.org/copyleft/gpl.html for details.
 
-// Package restclient provides a simple client library for interacting with
-// RESTful APIs.
+/*
+Package restclient is a client library for interacting with RESTful APIs.
+
+Example:
+
+	type Foo struct {
+		Bar string
+	}
+	type Spam struct {
+		Eggs int
+	}
+	f := Foo{
+		Bar: "baz",
+	}
+	s := Spam{}
+	r := restclient.RequestResponse{
+		Url:    "http://" + srv.Listener.Addr().String(),
+		Method: POST,
+		Data:   &f,
+		Result: &s,
+	}
+	println(s.Eggs)
+*/
 package restclient
 
 import (
@@ -56,7 +77,7 @@ type RequestResponse struct {
 
 // Client is a REST client.
 type Client struct {
-	HttpClient   *http.Client
+	HttpClient *http.Client
 }
 
 // New returns a new Client instance.
