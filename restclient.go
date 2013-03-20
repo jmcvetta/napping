@@ -22,7 +22,13 @@ Example:
 		Data:   &f,
 		Result: &s,
 	}
-	println(s.Eggs)
+	status, err := restclient.Do(&r)
+	if err != nil {
+		panic(err)
+	}
+	if status == 200 {
+		println(s.Eggs)
+	}
 */
 package restclient
 
