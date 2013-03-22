@@ -21,6 +21,5 @@ documentation](http://godoc.org/github.com/jmcvetta/restclient).
 ## License
 
 This is Free Software, released under the terms of the [GPL
-v3](http://www.gnu.org/copyleft/gpl.html).  Resist intellectual serfdom - the
-ownership of ideas is akin to slavery.
+v3](http://www.gnu.org/copyleft/gpl.html).
 
