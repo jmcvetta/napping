@@ -19,8 +19,7 @@ documentation](http://godoc.org/github.com/jmcvetta/restclient).
 
 Check out
 [examples/github_auth_token.go](https://github.com/jmcvetta/restclient/blob/master/examples/github_auth_token.go)
-for a working example showing how to use HTTP Basic authentication over HTTPS
-to retrieve a Github auth token.
+for a working example showing how to retrieve an auth token from the Github API.
 
 
 ## License
