@@ -38,6 +38,8 @@ func main() {
 	//
 	// Compose request
 	//
+	// http://developer.github.com/v3/oauth/#create-a-new-authorization
+	//
 	d := struct {
 		Scopes []string `json:"scopes"`
 		Note   string   `json:"note"`
@@ -62,7 +64,7 @@ func main() {
 	//
 	// Setup HTTP Basic auth (ONLY use this with SSL)
 	//
-	u := url.UserPassword("jmcvetta", passwd)
+	u := url.UserPassword(username, passwd)
 	rr := restclient.RequestResponse{
 		Url:      "https://api.github.com/authorizations",
 		Userinfo: u,
