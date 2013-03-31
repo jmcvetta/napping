@@ -37,6 +37,7 @@ package restclient
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -151,6 +152,10 @@ func (c *Client) Do(r *RequestResponse) (status int, err error) {
 	// Set HTTP Basic authentication if userinfo is supplied
 	//
 	if r.Userinfo != nil {
+		if u.Scheme != "https" {
+			err = errors.New("Unsafe to use HTTP Basic authentication without HTTPS")
+			return
+		}
 		pwd, _ := r.Userinfo.Password()
 		req.SetBasicAuth(r.Userinfo.Username(), pwd)
 	}
