@@ -12,7 +12,6 @@ import (
 	"code.google.com/p/gopass"
 	"fmt"
 	"github.com/jmcvetta/restclient"
-	"github.com/kr/pretty"
 	"log"
 	"net/url"
 )
@@ -62,6 +61,12 @@ func main() {
 		CreatedAt string `json:"created_at"`
 	}{}
 	//
+	// Struct to hold error response
+	//
+	e := struct {
+		Message string
+	}{}
+	//
 	// Setup HTTP Basic auth (ONLY use this with SSL)
 	//
 	u := url.UserPassword(username, passwd)
@@ -71,6 +76,7 @@ func main() {
 		Method:   "POST",
 		Data:     &d,
 		Result:   &res,
+		Error:    &e,
 	}
 	//
 	// Send request to server
@@ -85,8 +91,10 @@ func main() {
 	println("")
 	if status == 201 {
 		fmt.Printf("Github auth token: %s\n\n", res.Token)
-		return
+	} else {
+		fmt.Println("Bad response status from Github server")
+		fmt.Printf("\t Status:  %v\n", status)
+		fmt.Printf("\t Message: %v\n", e.Message)
 	}
-	fmt.Println("Bad response from Github server:")
-	pretty.Printf("%# v\n", res)
+	println("")
 }
