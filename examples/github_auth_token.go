@@ -1,3 +1,5 @@
+// Example demonstrating use of package restclient, with HTTP Basic
+// authentictation over HTTPS, to retrieve a Github auth token.
 package main
 
 /*
