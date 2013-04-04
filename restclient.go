@@ -167,6 +167,7 @@ func (c *Client) Do(r *RequestResponse) (status int, err error) {
 		complain(err, status, "")
 		return
 	}
+	defer resp.Body.Close()
 	status = resp.StatusCode
 	r.Status = resp.StatusCode
 	var data []byte
