@@ -86,13 +86,15 @@ type RequestResponse struct {
 
 // Client is a REST client.
 type Client struct {
-	HttpClient *http.Client
+	HttpClient      *http.Client
+	UnsafeBasicAuth bool // Allow Basic Auth over unencrypted HTTP
 }
 
 // New returns a new Client instance.
 func New() *Client {
 	return &Client{
-		HttpClient: new(http.Client),
+		HttpClient:      new(http.Client),
+		UnsafeBasicAuth: false,
 	}
 }
 
@@ -152,7 +154,7 @@ func (c *Client) Do(r *RequestResponse) (status int, err error) {
 	// Set HTTP Basic authentication if userinfo is supplied
 	//
 	if r.Userinfo != nil {
-		if u.Scheme != "https" {
+		if !c.UnsafeBasicAuth && u.Scheme != "https" {
 			err = errors.New("Unsafe to use HTTP Basic authentication without HTTPS")
 			return
 		}
