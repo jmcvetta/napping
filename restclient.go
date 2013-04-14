@@ -229,10 +229,10 @@ func complain(err error, status int, rawtext string) {
 }
 
 var (
-	defaultClient = New()
+	DefaultClient = New()
 )
 
 // Do executes a REST request using the default client.
 func Do(r *RequestResponse) (status int, err error) {
-	return defaultClient.Do(r)
+	return DefaultClient.Do(r)
 }
