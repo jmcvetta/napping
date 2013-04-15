@@ -93,6 +93,17 @@ func payloadHandler(t *testing.T, p payload, f hfunc) hfunc {
 	}
 }
 
+func methodHandler(t *testing.T, method string, f hfunc) hfunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		if f != nil {
+			f(w, req)
+		}
+		if req.Method != method {
+			t.Error("Incorrect method, got ", req.Method, " expected ", method)
+		}
+	}
+}
+
 func headerHandler(t *testing.T, h http.Header, f hfunc) hfunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		if f != nil {
@@ -129,13 +140,31 @@ func TestRequest(t *testing.T) {
 			t.Error(err)
 		}
 		//
+		// Method
+		//
+		r := baseRR
+		f := methodHandler(t, test.method, nil)
+		allHF = methodHandler(t, test.method, allHF)
+		pairs = append(pairs, pair{r, f})
+		//
+		// Header
+		//
+		h := http.Header{}
+		h.Add(key, value)
+		r = baseRR
+		r.Header = &h
+		allRR.Header = &h
+		f = headerHandler(t, h, nil)
+		allHF = headerHandler(t, h, allHF)
+		pairs = append(pairs, pair{r, f})
+		//
 		// Params
 		//
 		if test.params {
 			p := Params{key: value}
 			f := paramHandler(t, p, nil)
 			allHF = paramHandler(t, p, allHF)
-			r := baseRR
+			r = baseRR
 			r.Params = p
 			allRR.Params = p
 			pairs = append(pairs, pair{r, f})
@@ -145,24 +174,13 @@ func TestRequest(t *testing.T) {
 		//
 		if test.payload {
 			p := payload{value}
-			f := payloadHandler(t, p, nil)
+			f = payloadHandler(t, p, nil)
 			allHF = payloadHandler(t, p, allHF)
-			r := baseRR
+			r = baseRR
 			r.Data = p
 			allRR.Data = p
 			pairs = append(pairs, pair{r, f})
 		}
-		//
-		// Header
-		//
-		h := http.Header{}
-		h.Add(key, value)
-		f := headerHandler(t, h, nil)
-		allHF = headerHandler(t, h, allHF)
-		r := baseRR
-		r.Header = &h
-		allRR.Header = &h
-		pairs = append(pairs, pair{r, f})
 		//
 		// All
 		//
