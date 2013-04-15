@@ -5,8 +5,8 @@ A [Go](http://golang.org) client library for interacting with RESTful APIs.
 
 ## Status
 
-Fully usable and somewhat tested.  Subject to possible API changes, tho none
-are currently planned.  Used by, and developed in conjunction with, package
+Fully usable and somewhat tested.  Subject to possible API changes.  Used by,
+and developed in conjunction with, package
 [neo4j](https://github.com/jmcvetta/neo4j).
 
 [![Build Status](https://travis-ci.org/jmcvetta/restclient.png)](https://travis-ci.org/jmcvetta/restclient)
