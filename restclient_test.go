@@ -121,6 +121,8 @@ func headerHandler(t *testing.T, h http.Header, f hfunc) hfunc {
 }
 
 func TestRequest(t *testing.T) {
+	// NOTE:  Do we really need to test different combinations for different
+	// HTTP methods?
 	pairs := []pair{}
 	for _, test := range reqTests {
 		baseRR := RequestResponse{
