@@ -44,18 +44,13 @@ import (
 	"net/url"
 	"runtime"
 	"strconv"
+	"strings"
 	"time"
 )
 
 // A Method is an HTTP verb.
 type Method string
-
-var (
-	GET    = Method("GET")
-	PUT    = Method("PUT")
-	POST   = Method("POST")
-	DELETE = Method("DELETE")
-)
+type Params map[string]string
 
 // A RequestResponse describes an HTTP request to be executed, data
 // structures into which results and errors will be unmarshalled, and the
@@ -63,11 +58,11 @@ var (
 // response we allow easy access to Result and Error objects without needing
 // type assertions.
 type RequestResponse struct {
-	Url      string            // Raw URL string
-	Method   Method            // HTTP method to use 
-	Userinfo *url.Userinfo     // Optional username/password to authenticate this request
-	Params   map[string]string // URL parameters for GET requests (ignored otherwise)
-	Headers  *http.Header      // HTTP Headers to use (will override defaults)
+	Url      string        // Raw URL string
+	Method   string        // HTTP method to use
+	Userinfo *url.Userinfo // Optional username/password to authenticate this request
+	Params   Params        // URL parameters for GET requests (ignored otherwise)
+	Header   *http.Header  // HTTP Headers to use (will override defaults)
 	//
 	// The following interfaces fields should be populated with *pointers* to
 	// data structures.  Any structure that can be (un)marshalled by the json
@@ -100,6 +95,7 @@ func New() *Client {
 
 // Do executes a REST request.
 func (c *Client) Do(r *RequestResponse) (status int, err error) {
+	r.Method = strings.ToUpper(r.Method)
 	//
 	// Create a URL object from the raw url string.  This will allow us to compose
 	// query parameters programmatically and be guaranteed of a well-formed URL.
@@ -113,7 +109,7 @@ func (c *Client) Do(r *RequestResponse) (status int, err error) {
 	// If we are making a GET request and the user populated the Params field, then
 	// add the params to the URL's querystring.
 	//
-	if r.Method == GET && r.Params != nil {
+	if r.Method == "GET" && r.Params != nil {
 		vals := u.Query()
 		for k, v := range r.Params {
 			vals.Set(k, v)
@@ -143,6 +139,13 @@ func (c *Client) Do(r *RequestResponse) (status int, err error) {
 	if err != nil {
 		log.Println(err)
 		return
+	}
+	if r.Header != nil {
+		for key, values := range *r.Header {
+			if len(values) > 0 {
+				req.Header.Set(key, values[0]) // Possible to overwrite Content-Type
+			}
+		}
 	}
 	//
 	// If Accept header is unset, set it for JSON.
