@@ -10,9 +10,7 @@ and developed in conjunction with, package
 [neo4j](https://github.com/jmcvetta/neo4j).
 
 [![Build Status](https://drone.io/github.com/jmcvetta/restclient/status.png)](https://drone.io/github.com/jmcvetta/restclient/latest)
-
 [![Build Status](https://travis-ci.org/jmcvetta/restclient.png)](https://travis-ci.org/jmcvetta/restclient)
-
 [![Coverage Status](https://coveralls.io/repos/jmcvetta/restclient/badge.png?branch=master)](https://coveralls.io/r/jmcvetta/restclient)
 
 
