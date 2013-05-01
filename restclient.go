@@ -64,7 +64,7 @@ var (
 // type assertions.
 type RequestResponse struct {
 	Url      string            // Raw URL string
-	Method   Method            // HTTP method to use 
+	Method   Method            // HTTP method to use
 	Userinfo *url.Userinfo     // Optional username/password to authenticate this request
 	Params   map[string]string // URL parameters for GET requests (ignored otherwise)
 	Headers  *http.Header      // HTTP Headers to use (will override defaults)
@@ -86,8 +86,9 @@ type RequestResponse struct {
 
 // Client is a REST client.
 type Client struct {
-	HttpClient      *http.Client
-	UnsafeBasicAuth bool // Allow Basic Auth over unencrypted HTTP
+	HttpClient         *http.Client
+	UnsafeBasicAuth    bool // Allow Basic Auth over unencrypted HTTP
+	LogRequestResponse bool
 }
 
 // New returns a new Client instance.
@@ -164,6 +165,13 @@ func (c *Client) Do(r *RequestResponse) (status int, err error) {
 	//
 	// Execute the HTTP request
 	//
+	if c.LogRequestResponse {
+		log.Println("--------------------------------------------------------------------------------")
+		log.Println("REQUEST")
+		log.Println("--------------------------------------------------------------------------------")
+		b, _ := json.MarshalIndent(req, "", "\t")
+		log.Println("\n" + string(b))
+	}
 	resp, err := c.HttpClient.Do(req)
 	if err != nil {
 		complain(err, status, "")
@@ -195,11 +203,21 @@ func (c *Client) Do(r *RequestResponse) (status int, err error) {
 		log.Println(resp)
 		log.Println(resp.Request)
 	}
+	if c.LogRequestResponse {
+		log.Println("--------------------------------------------------------------------------------")
+		log.Println("RESPONSE")
+		log.Println("--------------------------------------------------------------------------------")
+		log.Println("Status: ", status)
+		raw := json.RawMessage{}
+		c.unmarshal(data, &raw)
+		b, _ := json.MarshalIndent(&raw, "", "\t")
+		log.Println("\n" + string(b))
+	}
 	return
 }
 
 // unmarshal parses the JSON-encoded data and stores the result in the value
-// pointed to by v.  If the data cannot be unmarshalled without error, v will be 
+// pointed to by v.  If the data cannot be unmarshalled without error, v will be
 // reassigned the value interface{}, and data unmarshalled into that.
 func (c *Client) unmarshal(data []byte, v interface{}) error {
 	err := json.Unmarshal(data, v)
