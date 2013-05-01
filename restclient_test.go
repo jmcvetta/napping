@@ -3,10 +3,6 @@
 // details.  Resist intellectual serfdom - the ownership of ideas is akin to
 // slavery.
 
-//
-// The Neo4j Manual section numbers quoted herein refer to the manual for 
-// milestone release 1.8.M06.  http://docs.neo4j.org/chunked/milestone/
-
 package restclient
 
 import (
@@ -148,7 +144,7 @@ func HandlePut(w http.ResponseWriter, req *http.Request) {
 func TestGet(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(HandleGet))
 	defer srv.Close()
-	// 
+	//
 	// Good request
 	//
 	client := New()
@@ -165,7 +161,7 @@ func TestGet(t *testing.T) {
 	}
 	assert.Equal(t, status, 200)
 	assert.Equal(t, r.Result, &barStruct)
-	// 
+	//
 	// Bad request
 	//
 	client = New()
