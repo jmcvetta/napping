@@ -13,6 +13,7 @@ import (
 	"log"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"testing"
 )
 
@@ -212,6 +213,21 @@ func TestInvalidUrl(t *testing.T) {
 	_, err := client.Do(&rr)
 	assert.NotEqual(t, nil, err)
 
+}
+
+func TestUnsafeBasicAuth(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(HandlePost))
+	defer srv.Close()
+	client := New()
+	client.Log = true
+	r := RequestResponse{
+		Url:      "http://" + srv.Listener.Addr().String(),
+		Method:   "GET",
+		Userinfo: url.UserPassword("a", "b"),
+	}
+	client.Log = true
+	_, err := client.Do(&r)
+	assert.NotEqual(t, nil, err)
 }
 
 //
