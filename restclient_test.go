@@ -203,6 +203,17 @@ func TestRequest(t *testing.T) {
 	}
 }
 
+func TestInvalidUrl(t *testing.T) {
+	client := New()
+	rr := RequestResponse{
+		Url:    "carrots",
+		Method: "GET",
+	}
+	_, err := client.Do(&rr)
+	assert.NotEqual(t, nil, err)
+
+}
+
 //
 // TODO: Response Tests
 //
@@ -289,6 +300,7 @@ func TestPost(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(HandlePost))
 	defer srv.Close()
 	client := New()
+	client.Log = true
 	r := RequestResponse{
 		Url:    "http://" + srv.Listener.Addr().String(),
 		Method: "POST",
