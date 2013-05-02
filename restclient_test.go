@@ -188,6 +188,7 @@ func TestPost(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(HandlePost))
 	defer srv.Close()
 	client := New()
+	client.LogRequestResponse = true
 	r := RequestResponse{
 		Url:    "http://" + srv.Listener.Addr().String(),
 		Method: POST,
