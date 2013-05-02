@@ -82,9 +82,9 @@ type RequestResponse struct {
 
 // Client is a REST client.
 type Client struct {
-	HttpClient         *http.Client
-	UnsafeBasicAuth    bool // Allow Basic Auth over unencrypted HTTP
-	LogRequestResponse bool
+	HttpClient      *http.Client
+	UnsafeBasicAuth bool // Allow Basic Auth over unencrypted HTTP
+	Log             bool // Log request and response
 }
 
 // New returns a new Client instance.
@@ -169,7 +169,7 @@ func (c *Client) Do(r *RequestResponse) (status int, err error) {
 	//
 	// Execute the HTTP request
 	//
-	if c.LogRequestResponse {
+	if c.Log {
 		log.Println("--------------------------------------------------------------------------------")
 		log.Println("REQUEST")
 		log.Println("--------------------------------------------------------------------------------")
@@ -207,7 +207,7 @@ func (c *Client) Do(r *RequestResponse) (status int, err error) {
 		log.Println(resp)
 		log.Println(resp.Request)
 	}
-	if c.LogRequestResponse {
+	if c.Log {
 		log.Println("--------------------------------------------------------------------------------")
 		log.Println("RESPONSE")
 		log.Println("--------------------------------------------------------------------------------")
