@@ -20,6 +20,10 @@ import (
 // A Params is a map containing URL parameters.
 type Params map[string]string
 
+// A UnexpectedStatus error is returned when ExpectedStatus is set, and the
+// server return a status code other than what is expected.
+var UnexpectedStatus = errors.New("Server returned unexpected status.")
+
 // A RequestResponse describes an HTTP request to be executed, data
 // structures into which results and errors will be unmarshalled, and the
 // server's response.  By using a single object for both the request and the
@@ -163,32 +167,27 @@ func (c *Client) Do(rr *RequestResponse) (status int, err error) {
 		return
 	}
 	rr.RawText = string(data)
-	// If server returned no data, don't bother trying to unmarshall it (which will fail anyways).
-	if rr.RawText == "" {
-		return
-	}
-	if status >= 200 && status < 300 {
-		err = c.unmarshal(data, &rr.Result)
-	} else {
-		err = c.unmarshal(data, &rr.Error)
-	}
-	if err != nil {
-		log.Println(status)
-		log.Println(err)
-		log.Println(rr.RawText)
-		log.Println(resp)
-		log.Println(resp.Request)
-	}
 	if c.Log {
 		log.Println("--------------------------------------------------------------------------------")
 		log.Println("RESPONSE")
 		log.Println("--------------------------------------------------------------------------------")
 		log.Println("Status: ", status)
 		raw := json.RawMessage{}
-		c.unmarshal(data, &raw)
-		b, _ := json.MarshalIndent(&raw, "", "\t")
-		log.Println("\n" + string(b))
+		json.Unmarshal(data, &raw)
+		prettyPrint(raw)
 	}
+	json.Unmarshal(data, &rr.Error) // Ignore errors
+	if rr.ExpectedStatus != 0 && status != rr.ExpectedStatus {
+		json.Unmarshal(data, &rr.Result) // Ignore errors
+		log.Printf("Expected status %s but got %s", rr.ExpectedStatus, status)
+		return status, UnexpectedStatus
+	}
+	// If server returned no data, don't bother trying to unmarshall it (which
+	// will fail anyways).
+	if rr.RawText == "" {
+		return
+	}
+	err = json.Unmarshal(data, &rr.Result)
 	return
 }
 

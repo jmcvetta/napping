@@ -206,13 +206,24 @@ func TestRequest(t *testing.T) {
 
 func TestInvalidUrl(t *testing.T) {
 	client := New()
+	//
+	//  Missing protocol scheme - url.Parse should fail
+	//
 	rr := RequestResponse{
-		Url:    "carrots",
+		Url:    "://foobar.com",
 		Method: "GET",
 	}
 	_, err := client.Do(&rr)
 	assert.NotEqual(t, nil, err)
-
+	//
+	// Unsupported protocol scheme - HttpClient.Do should fail
+	//
+	rr = RequestResponse{
+		Url:    "foo://bar.com",
+		Method: "GET",
+	}
+	_, err = client.Do(&rr)
+	assert.NotEqual(t, nil, err)
 }
 
 func TestUnsafeBasicAuth(t *testing.T) {
@@ -277,30 +288,31 @@ func TestGet(t *testing.T) {
 	//
 	client := New()
 	r := RequestResponse{
-		Url:    "http://" + srv.Listener.Addr().String(),
-		Method: "GET",
-		Params: fooMap,
-		// Params: map[string]string{"bad": "value"},
-		Result: new(structType),
+		Url:            "http://" + srv.Listener.Addr().String(),
+		Method:         "GET",
+		Params:         fooMap,
+		Result:         new(structType),
+		ExpectedStatus: 200,
 	}
 	status, err := client.Do(&r)
 	if err != nil {
 		t.Error(err)
 	}
-	assert.Equal(t, status, 200)
+	assert.Equal(t, 200, status)
 	assert.Equal(t, r.Result, &barStruct)
 	//
 	// Bad request
 	//
 	client = New()
 	r = RequestResponse{
-		Url:    "http://" + srv.Listener.Addr().String(),
-		Method: "GET",
-		Params: map[string]string{"bad": "value"},
-		Error:  new(errorStruct),
+		Url:            "http://" + srv.Listener.Addr().String(),
+		Method:         "GET",
+		Params:         map[string]string{"bad": "value"},
+		Error:          new(errorStruct),
+		ExpectedStatus: 200,
 	}
 	status, err = client.Do(&r)
-	if err != nil {
+	if err != UnexpectedStatus {
 		t.Error(err)
 	}
 	assert.Equal(t, status, 500)

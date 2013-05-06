@@ -47,15 +47,3 @@ func complain(err error, status int, rawtext string) {
 	s += "    --> " + err.Error()
 	log.Println(s)
 }
-
-// unmarshal parses the JSON-encoded data and stores the result in the value
-// pointed to by v.  If the data cannot be unmarshalled without error, v will be
-// reassigned the value interface{}, and data unmarshalled into that.
-func (c *Client) unmarshal(data []byte, v interface{}) error {
-	err := json.Unmarshal(data, v)
-	if err == nil {
-		return nil
-	}
-	v = new(interface{})
-	return json.Unmarshal(data, v)
-}
