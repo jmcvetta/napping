@@ -3,35 +3,6 @@
 // details.  Resist intellectual serfdom - the ownership of ideas is akin to
 // slavery.
 
-/*
-Package restclient is a client library for interacting with RESTful APIs.
-
-Example:
-
-	type Foo struct {
-		Bar string
-	}
-	type Spam struct {
-		Eggs int
-	}
-	f := Foo{
-		Bar: "baz",
-	}
-	s := Spam{}
-	r := restclient.RequestResponse{
-		Url:    "http://foo.com/bar",
-		Method: restclient.POST,
-		Data:   &f,
-		Result: &s,
-	}
-	status, err := restclient.Do(&r)
-	if err != nil {
-		panic(err)
-	}
-	if status == 200 {
-		println(s.Eggs)
-	}
-*/
 package restclient
 
 import (
@@ -42,8 +13,6 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"runtime"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -218,36 +187,6 @@ func (c *Client) Do(r *RequestResponse) (status int, err error) {
 		log.Println("\n" + string(b))
 	}
 	return
-}
-
-// unmarshal parses the JSON-encoded data and stores the result in the value
-// pointed to by v.  If the data cannot be unmarshalled without error, v will be
-// reassigned the value interface{}, and data unmarshalled into that.
-func (c *Client) unmarshal(data []byte, v interface{}) error {
-	err := json.Unmarshal(data, v)
-	if err == nil {
-		return nil
-	}
-	v = new(interface{})
-	return json.Unmarshal(data, v)
-}
-
-// complain prints detailed error messages to the log.
-func complain(err error, status int, rawtext string) {
-	_, file, line, ok := runtime.Caller(2)
-	if !ok {
-		file = "???"
-		line = 0
-	}
-	lineNo := strconv.Itoa(line)
-	s := "Error executing REST request:\n"
-	s += "    --> Called from " + file + ":" + lineNo + "\n"
-	s += "    --> Got status " + strconv.Itoa(status) + "\n"
-	if rawtext != "" {
-		s += "    --> Raw text of server response: " + rawtext + "\n"
-	}
-	s += "    --> " + err.Error()
-	log.Println(s)
 }
 
 var (
