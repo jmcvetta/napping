@@ -29,21 +29,3 @@ func prettyPrint(v interface{}) {
 	s := file + ":" + lineNo + ": \n" + string(b) + "\n"
 	os.Stderr.WriteString(s)
 }
-
-// complain prints detailed error messages to the log.
-func complain(err error, status int, rawtext string) {
-	_, file, line, ok := runtime.Caller(2)
-	if !ok {
-		file = "???"
-		line = 0
-	}
-	lineNo := strconv.Itoa(line)
-	s := "Error executing REST request:\n"
-	s += "    --> Called from " + file + ":" + lineNo + "\n"
-	s += "    --> Got status " + strconv.Itoa(status) + "\n"
-	if rawtext != "" {
-		s += "    --> Raw text of server response: " + rawtext + "\n"
-	}
-	s += "    --> " + err.Error()
-	log.Println(s)
-}
