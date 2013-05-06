@@ -305,7 +305,6 @@ func TestGet(t *testing.T) {
 	//
 	// Good request
 	//
-	client := New()
 	r := RequestResponse{
 		Url:            "http://" + srv.Listener.Addr().String(),
 		Method:         "GET",
@@ -313,7 +312,7 @@ func TestGet(t *testing.T) {
 		Result:         new(structType),
 		ExpectedStatus: 200,
 	}
-	status, err := client.Do(&r)
+	status, err := Do(&r)
 	if err != nil {
 		t.Error(err)
 	}
@@ -322,7 +321,6 @@ func TestGet(t *testing.T) {
 	//
 	// Bad request
 	//
-	client = New()
 	r = RequestResponse{
 		Url:            "http://" + srv.Listener.Addr().String(),
 		Method:         "GET",
@@ -330,7 +328,7 @@ func TestGet(t *testing.T) {
 		Error:          new(errorStruct),
 		ExpectedStatus: 200,
 	}
-	status, err = client.Do(&r)
+	status, err = Do(&r)
 	if err != UnexpectedStatus {
 		t.Error(err)
 	}
