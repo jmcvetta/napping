@@ -32,6 +32,12 @@ type RequestResponse struct {
 	Params   Params        // URL parameters for GET requests (ignored otherwise)
 	Header   *http.Header  // HTTP Headers to use (will override defaults)
 	//
+	// OPTIONAL - ExpectedStatus is the HTTP status code we expect the server
+	// to return on a successful request.  If ExpectedStatus is non-zero and
+	// server returns a different code, Client.Do will return a BadStatus error.
+	//
+	ExpectedStatus int
+	//
 	// The following interfaces fields should be populated with *pointers* to
 	// data structures.  Any structure that can be (un)marshalled by the json
 	// package can be used.
