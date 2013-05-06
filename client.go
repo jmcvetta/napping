@@ -102,8 +102,11 @@ func (c *Client) Do(rr *RequestResponse) (status int, err error) {
 	rr.Timestamp = time.Now()
 	m := string(rr.Method)
 	var req *http.Request
+	// http.NewRequest can only return an error if url.Parse fails.  Since the
+	// url has already been successfully parsed once at this point, there is no
+	// danger of this, so we can ignore errors returned by http.NewRequest.
 	if rr.Data == nil {
-		req, err = http.NewRequest(m, u.String(), nil)
+		req, _ = http.NewRequest(m, u.String(), nil)
 	} else {
 		var b []byte
 		b, err = json.Marshal(&rr.Data)
@@ -112,12 +115,8 @@ func (c *Client) Do(rr *RequestResponse) (status int, err error) {
 			return
 		}
 		buf := bytes.NewBuffer(b)
-		req, err = http.NewRequest(m, u.String(), buf)
+		req, _ = http.NewRequest(m, u.String(), buf)
 		req.Header.Add("Content-Type", "application/json")
-	}
-	if err != nil {
-		log.Println(err)
-		return
 	}
 	if rr.Header != nil {
 		for key, values := range *rr.Header {
