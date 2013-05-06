@@ -106,7 +106,7 @@ func (c *Client) Do(rr *RequestResponse) (status int, err error) {
 		req, err = http.NewRequest(m, u.String(), nil)
 	} else {
 		var b []byte
-		b, err = json.Marshal(rr.Data)
+		b, err = json.Marshal(&rr.Data)
 		if err != nil {
 			log.Println(err)
 			return
