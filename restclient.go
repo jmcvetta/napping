@@ -17,9 +17,7 @@ import (
 	"time"
 )
 
-// A Method is an HTTP verb.
-type Method string
-
+// A Params is a map containing URL parameters.
 type Params map[string]string
 
 // A RequestResponse describes an HTTP request to be executed, data
@@ -65,13 +63,13 @@ func New() *Client {
 }
 
 // Do executes a REST request.
-func (c *Client) Do(r *RequestResponse) (status int, err error) {
-	r.Method = strings.ToUpper(r.Method)
+func (c *Client) Do(rr *RequestResponse) (status int, err error) {
+	rr.Method = strings.ToUpper(rr.Method)
 	//
 	// Create a URL object from the raw url string.  This will allow us to compose
 	// query parameters programmatically and be guaranteed of a well-formed URL.
 	//
-	u, err := url.Parse(r.Url)
+	u, err := url.Parse(rr.Url)
 	if err != nil {
 		log.Println(err)
 		return
@@ -80,9 +78,9 @@ func (c *Client) Do(r *RequestResponse) (status int, err error) {
 	// If we are making a GET request and the user populated the Params field, then
 	// add the params to the URL's querystring.
 	//
-	if r.Method == "GET" && r.Params != nil {
+	if rr.Method == "GET" && rr.Params != nil {
 		vals := u.Query()
-		for k, v := range r.Params {
+		for k, v := range rr.Params {
 			vals.Set(k, v)
 		}
 		u.RawQuery = vals.Encode()
@@ -91,14 +89,14 @@ func (c *Client) Do(r *RequestResponse) (status int, err error) {
 	// Create a Request object; if populated, Data field is JSON encoded as request
 	// body
 	//
-	r.Timestamp = time.Now()
-	m := string(r.Method)
+	rr.Timestamp = time.Now()
+	m := string(rr.Method)
 	var req *http.Request
-	if r.Data == nil {
+	if rr.Data == nil {
 		req, err = http.NewRequest(m, u.String(), nil)
 	} else {
 		var b []byte
-		b, err = json.Marshal(r.Data)
+		b, err = json.Marshal(rr.Data)
 		if err != nil {
 			log.Println(err)
 			return
@@ -111,8 +109,8 @@ func (c *Client) Do(r *RequestResponse) (status int, err error) {
 		log.Println(err)
 		return
 	}
-	if r.Header != nil {
-		for key, values := range *r.Header {
+	if rr.Header != nil {
+		for key, values := range *rr.Header {
 			if len(values) > 0 {
 				req.Header.Set(key, values[0]) // Possible to overwrite Content-Type
 			}
@@ -127,13 +125,13 @@ func (c *Client) Do(r *RequestResponse) (status int, err error) {
 	//
 	// Set HTTP Basic authentication if userinfo is supplied
 	//
-	if r.Userinfo != nil {
+	if rr.Userinfo != nil {
 		if !c.UnsafeBasicAuth && u.Scheme != "https" {
 			err = errors.New("Unsafe to use HTTP Basic authentication without HTTPS")
 			return
 		}
-		pwd, _ := r.Userinfo.Password()
-		req.SetBasicAuth(r.Userinfo.Username(), pwd)
+		pwd, _ := rr.Userinfo.Password()
+		req.SetBasicAuth(rr.Userinfo.Username(), pwd)
 	}
 	//
 	// Execute the HTTP request
@@ -142,37 +140,36 @@ func (c *Client) Do(r *RequestResponse) (status int, err error) {
 		log.Println("--------------------------------------------------------------------------------")
 		log.Println("REQUEST")
 		log.Println("--------------------------------------------------------------------------------")
-		b, _ := json.MarshalIndent(req, "", "\t")
-		log.Println("\n" + string(b))
+		prettyPrint(req)
 	}
 	resp, err := c.HttpClient.Do(req)
 	if err != nil {
-		complain(err, status, "")
+		log.Println(err)
 		return
 	}
 	defer resp.Body.Close()
 	status = resp.StatusCode
-	r.Status = resp.StatusCode
+	rr.Status = resp.StatusCode
 	var data []byte
 	data, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
-		complain(err, status, string(data))
+		log.Println(err)
 		return
 	}
-	r.RawText = string(data)
+	rr.RawText = string(data)
 	// If server returned no data, don't bother trying to unmarshall it (which will fail anyways).
-	if r.RawText == "" {
+	if rr.RawText == "" {
 		return
 	}
 	if status >= 200 && status < 300 {
-		err = c.unmarshal(data, &r.Result)
+		err = c.unmarshal(data, &rr.Result)
 	} else {
-		err = c.unmarshal(data, &r.Error)
+		err = c.unmarshal(data, &rr.Error)
 	}
 	if err != nil {
 		log.Println(status)
 		log.Println(err)
-		log.Println(r.RawText)
+		log.Println(rr.RawText)
 		log.Println(resp)
 		log.Println(resp.Request)
 	}
@@ -194,6 +191,6 @@ var (
 )
 
 // Do executes a REST request using the default client.
-func Do(r *RequestResponse) (status int, err error) {
-	return defaultClient.Do(r)
+func Do(rr *RequestResponse) (status int, err error) {
+	return defaultClient.Do(rr)
 }
