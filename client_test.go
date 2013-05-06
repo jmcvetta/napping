@@ -6,6 +6,7 @@
 package restclient
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"github.com/bmizerany/assert"
 	"github.com/jmcvetta/randutil"
@@ -15,6 +16,8 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"reflect"
+	"regexp"
+	"strings"
 	"testing"
 )
 
@@ -227,17 +230,32 @@ func TestInvalidUrl(t *testing.T) {
 	assert.NotEqual(t, nil, err)
 }
 
+func TestBasicAuth(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(HandleGetBasicAuth))
+	defer srv.Close()
+	client := New()
+	client.UnsafeBasicAuth = true // Otherwise we will get error with httptest
+	r := RequestResponse{
+		Url:            "http://" + srv.Listener.Addr().String(),
+		Method:         "GET",
+		Userinfo:       url.UserPassword("jtkirk", "Beam me up, Scotty!"),
+		ExpectedStatus: 200,
+	}
+	_, err := client.Do(&r)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestUnsafeBasicAuth(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(HandlePost))
 	defer srv.Close()
 	client := New()
-	client.Log = true
 	r := RequestResponse{
 		Url:      "http://" + srv.Listener.Addr().String(),
 		Method:   "GET",
 		Userinfo: url.UserPassword("a", "b"),
 	}
-	client.Log = true
 	_, err := client.Do(&r)
 	assert.NotEqual(t, nil, err)
 }
@@ -419,6 +437,43 @@ func HandleGet(w http.ResponseWriter, req *http.Request) {
 	req.Header.Add("content-type", "application/json")
 	w.Write(blob)
 }
+
+func HandleGetBasicAuth(w http.ResponseWriter, req *http.Request) {
+	authRegex := regexp.MustCompile(`[Bb]asic (?P<encoded>\S+)`)
+	str := req.Header.Get("Authorization")
+	matches := authRegex.FindStringSubmatch(str)
+	if len(matches) != 2 {
+		msg := "Regex doesn't match"
+		log.Println(msg)
+		http.Error(w, msg, http.StatusBadRequest)
+		return
+	}
+	encoded := matches[1]
+	b, err := base64.URLEncoding.DecodeString(encoded)
+	if err != nil {
+		msg := "Base64 decode failed"
+		log.Println(msg)
+		http.Error(w, msg, http.StatusBadRequest)
+		return
+	}
+	parts := strings.Split(string(b), ":")
+	if len(parts) != 2 {
+		msg := "String split failed"
+		log.Println(msg)
+		http.Error(w, msg, http.StatusBadRequest)
+		return
+	}
+	username := parts[0]
+	password := parts[1]
+	if username != "jtkirk" || password != "Beam me up, Scotty!" {
+		code := http.StatusUnauthorized
+		text := http.StatusText(code)
+		http.Error(w, text, code)
+		return
+	}
+	w.WriteHeader(200)
+}
+
 func HandlePost(w http.ResponseWriter, req *http.Request) {
 	//
 	// Parse Payload
