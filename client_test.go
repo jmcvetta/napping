@@ -14,6 +14,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"reflect"
 	"testing"
 )
 
@@ -341,6 +342,28 @@ func TestPost(t *testing.T) {
 	}
 	assert.Equal(t, status, 200)
 	assert.Equal(t, r.Result, &barStruct)
+}
+
+func TestPostUnmarshallable(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(HandlePost))
+	defer srv.Close()
+	client := New()
+	type ft func()
+	var f ft
+	r := RequestResponse{
+		Url:    "http://" + srv.Listener.Addr().String(),
+		Method: "POST",
+		Result: new(structType),
+		Data:   &f,
+	}
+	_, err := client.Do(&r)
+	assert.NotEqual(t, nil, err)
+	log.Println(reflect.ValueOf(err))
+	_, ok := err.(*json.UnsupportedTypeError)
+	if !ok {
+		t.Log(err)
+		t.Error("Expected json.UnsupportedTypeError")
+	}
 }
 
 func TestPut(t *testing.T) {
