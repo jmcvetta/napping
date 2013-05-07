@@ -171,9 +171,14 @@ func (c *Client) Do(rr *RequestResponse) (status int, err error) {
 		log.Println("RESPONSE")
 		log.Println("--------------------------------------------------------------------------------")
 		log.Println("Status: ", status)
-		raw := json.RawMessage{}
-		json.Unmarshal(data, &raw)
-		prettyPrint(raw)
+		if rr.RawText != "" {
+			raw := json.RawMessage{}
+			json.Unmarshal([]byte(rr.RawText), &raw)
+			prettyPrint(&raw)
+		} else {
+			log.Println("Empty response body")
+		}
+
 	}
 	json.Unmarshal(data, &rr.Error) // Ignore errors
 	if rr.ExpectedStatus != 0 && status != rr.ExpectedStatus {
