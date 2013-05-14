@@ -15,7 +15,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
-	"reflect"
 	"regexp"
 	"strings"
 	"testing"
@@ -374,7 +373,6 @@ func TestPostUnmarshallable(t *testing.T) {
 	}
 	_, err := client.Do(&r)
 	assert.NotEqual(t, nil, err)
-	log.Println(reflect.ValueOf(err))
 	_, ok := err.(*json.UnsupportedTypeError)
 	if !ok {
 		t.Log(err)
