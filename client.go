@@ -166,6 +166,10 @@ func (c *Client) Do(rr *RequestResponse) (status int, err error) {
 		return
 	}
 	rr.RawText = string(data)
+	json.Unmarshal(data, &rr.Error) // Ignore errors
+	if rr.RawText != "" && status < 300 {
+		err = json.Unmarshal(data, &rr.Result) // Ignore errors
+	}
 	if c.Log {
 		log.Println("--------------------------------------------------------------------------------")
 		log.Println("RESPONSE")
@@ -173,25 +177,20 @@ func (c *Client) Do(rr *RequestResponse) (status int, err error) {
 		log.Println("Status: ", status)
 		if rr.RawText != "" {
 			raw := json.RawMessage{}
-			json.Unmarshal([]byte(rr.RawText), &raw)
-			prettyPrint(&raw)
+			if json.Unmarshal(data, &raw) == nil {
+				prettyPrint(&raw)
+			} else {
+				prettyPrint(rr.RawText)
+			}
 		} else {
 			log.Println("Empty response body")
 		}
 
 	}
-	json.Unmarshal(data, &rr.Error) // Ignore errors
 	if rr.ExpectedStatus != 0 && status != rr.ExpectedStatus {
-		json.Unmarshal(data, &rr.Result) // Ignore errors
 		log.Printf("Expected status %s but got %s", rr.ExpectedStatus, status)
 		return status, UnexpectedStatus
 	}
-	// If server returned no data, don't bother trying to unmarshall it (which
-	// will fail anyways).
-	if rr.RawText == "" {
-		return
-	}
-	err = json.Unmarshal(data, &rr.Result)
 	return
 }
 
