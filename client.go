@@ -115,7 +115,11 @@ func (c *Client) Do(rr *RequestResponse) (status int, err error) {
 			return
 		}
 		buf := bytes.NewBuffer(b)
-		req, _ = http.NewRequest(m, u.String(), buf)
+		req, err = http.NewRequest(m, u.String(), buf)
+		if err != nil {
+			log.Println(err)
+			return
+		}
 		req.Header.Add("Content-Type", "application/json")
 	}
 	if rr.Header != nil {
