@@ -154,6 +154,8 @@ func (c *Client) Do(rr *RequestResponse) (status int, err error) {
 		log.Println("REQUEST")
 		log.Println("--------------------------------------------------------------------------------")
 		prettyPrint(req)
+		log.Print("Payload: ")
+		prettyPrint(rr.Data)
 	}
 	resp, err := c.HttpClient.Do(req)
 	if err != nil {
