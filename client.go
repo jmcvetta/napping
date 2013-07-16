@@ -52,9 +52,10 @@ type RequestResponse struct {
 	//
 	// The following fields are populated by Client.Do()
 	//
-	Timestamp time.Time // Time when HTTP request was sent
-	RawText   string    // Raw text of server response (JSON or otherwise)
-	Status    int       // HTTP status for executed request
+	Timestamp    time.Time      // Time when HTTP request was sent
+	RawText      string         // Raw text of server response (JSON or otherwise)
+	Status       int            // HTTP status for executed request
+	HttpResponse *http.Response // Response object from http package
 }
 
 // Client is a REST client.
@@ -164,6 +165,7 @@ func (c *Client) Do(rr *RequestResponse) (status int, err error) {
 	}
 	defer resp.Body.Close()
 	status = resp.StatusCode
+	rr.HttpResponse = resp
 	rr.Status = resp.StatusCode
 	var data []byte
 	data, err = ioutil.ReadAll(resp.Body)
