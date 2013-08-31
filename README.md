@@ -1,22 +1,28 @@
-# restclient
+# restclient - RESTful HTTP client for Go
 
-A [Go](http://golang.org) client library for interacting with RESTful APIs.
+Package `restclient` is a [Go](http://golang.org) client library for
+interacting with [RESTful
+APIs](http://en.wikipedia.org/wiki/Representational_state_transfer#RESTful_web_APIs).
 
 
 ## Status
 
-Fully usable and somewhat tested.  Subject to possible API changes.  Used by,
-and developed in conjunction with, package
-[neo4j](https://github.com/jmcvetta/neo4j).
-
-[![Build Status](https://drone.io/github.com/jmcvetta/restclient/status.png)](https://drone.io/github.com/jmcvetta/restclient/latest)
-[![Build Status](https://travis-ci.org/jmcvetta/restclient.png)](https://travis-ci.org/jmcvetta/restclient)
+[![Drone Build Status](https://drone.io/github.com/jmcvetta/restclient/status.png)](https://drone.io/github.com/jmcvetta/restclient/latest)
+[![Travis Build Status](https://travis-ci.org/jmcvetta/restclient.png)](https://travis-ci.org/jmcvetta/restclient)
 [![Coverage Status](https://coveralls.io/repos/jmcvetta/restclient/badge.png?branch=master)](https://coveralls.io/r/jmcvetta/restclient)
+[![GoCI Build Status](http://goci.me/project/image/github.com/jmcvetta/restclient)](http://goci.me/project/github.com/jmcvetta/restclient)
+
+API is fairly stable, but there may be additions and small changes from time to
+time.  All API changes will be made via Pull Request, so it's recommended you
+Watch the repo Issues if using `restclient` in production.
+
+Used by, and developed in conjunction with, package
+[neoism](https://github.com/jmcvetta/neoism).
 
 
 ## Documentation
 
-See GoDoc for [automatically generated
+See GoDoc for [automatically generated API
 documentation](http://godoc.org/github.com/jmcvetta/restclient).
 
 Check out
