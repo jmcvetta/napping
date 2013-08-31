@@ -10,7 +10,6 @@ APIs](http://en.wikipedia.org/wiki/Representational_state_transfer#RESTful_web_A
 [![Drone Build Status](https://drone.io/github.com/jmcvetta/restclient/status.png)](https://drone.io/github.com/jmcvetta/restclient/latest)
 [![Travis Build Status](https://travis-ci.org/jmcvetta/restclient.png)](https://travis-ci.org/jmcvetta/restclient)
 [![Coverage Status](https://coveralls.io/repos/jmcvetta/restclient/badge.png?branch=master)](https://coveralls.io/r/jmcvetta/restclient)
-[![GoCI Build Status](http://goci.me/project/image/github.com/jmcvetta/restclient)](http://goci.me/project/github.com/jmcvetta/restclient)
 
 API is fairly stable, but there may be additions and small changes from time to
 time.  All API changes will be made via Pull Request, so it's recommended you
