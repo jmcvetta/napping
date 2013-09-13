@@ -3,7 +3,7 @@
 // details.  Resist intellectual serfdom - the ownership of ideas is akin to
 // slavery.
 
-package restclient
+package napping
 
 import (
 	"encoding/base64"

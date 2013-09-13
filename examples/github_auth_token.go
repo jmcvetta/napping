@@ -3,7 +3,7 @@
 // details.  Resist intellectual serfdom - the ownership of ideas is akin to
 // slavery.
 
-// Example demonstrating use of package restclient, with HTTP Basic
+// Example demonstrating use of package napping, with HTTP Basic
 // authentictation over HTTPS, to retrieve a Github auth token.
 package main
 
@@ -16,7 +16,7 @@ NOTE: This example may only work on *nix systems due to gopass requirements.
 import (
 	"code.google.com/p/gopass"
 	"fmt"
-	"github.com/jmcvetta/restclient"
+	"github.com/jmcvetta/napping"
 	"log"
 	"net/url"
 )
@@ -49,7 +49,7 @@ func main() {
 		Note   string   `json:"note"`
 	}{
 		Scopes: []string{"public_repo"},
-		Note:   "testing Go restclient",
+		Note:   "testing Go napping",
 	}
 	//
 	// Struct to hold response data
@@ -75,7 +75,7 @@ func main() {
 	// Setup HTTP Basic auth (ONLY use this with SSL)
 	//
 	u := url.UserPassword(username, passwd)
-	rr := restclient.RequestResponse{
+	rr := napping.RequestResponse{
 		Url:      "https://api.github.com/authorizations",
 		Userinfo: u,
 		Method:   "POST",
@@ -86,7 +86,7 @@ func main() {
 	//
 	// Send request to server
 	//
-	status, err := restclient.Do(&rr)
+	status, err := napping.Do(&rr)
 	if err != nil {
 		log.Fatal(err)
 	}
