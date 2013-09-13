@@ -1,4 +1,4 @@
-# napping - RESTful HTTP client for Go
+# napping: HTTP for Gophers
 
 Package `napping` is a [Go](http://golang.org) client library for
 interacting with [RESTful
