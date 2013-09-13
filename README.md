@@ -1,8 +1,8 @@
-# napping: HTTP for Gophers
+# Napping: HTTP for Gophers
 
 Package `napping` is a [Go][] client library for interacting with
-[RESTful APIs][].  `napping` was inspired  by Python's excellent
-[`requests`][requests] package.
+[RESTful APIs][].  Napping was inspired  by Python's excellent [Requests][]
+library.
 
 
 ## Status
@@ -33,7 +33,7 @@ This is Free Software, released under the terms of the [GPL v3][].
 
 [Go]:           http://golang.org
 [RESTful APIs]: http://en.wikipedia.org/wiki/Representational_state_transfer#RESTful_web_APIs
-[requests]:     http://python-requests.org
+[Requests]:     http://python-requests.org
 [GPL v3]:       http://www.gnu.org/copyleft/gpl.html
 [auth-token]:   https://github.com/jmcvetta/napping/blob/master/examples/github_auth_token.go
 [godoc]:        http://godoc.org/github.com/jmcvetta/napping
