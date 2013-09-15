@@ -11,11 +11,6 @@ This module implements the Napping API.
 
 import ()
 
-// Request constructs and sends an HTTP request.
-func Request(method, url string, response interface{}, o *Opts) (status int, err error) {
-	return 0, nil
-}
-
 // Get sends a GET request.
 func Get(url string, p *Params, response interface{}, o *Opts) (status int, err error) {
 	return 0, nil

@@ -8,6 +8,7 @@ package napping
 import (
 	"net/http"
 	"net/url"
+	"time"
 )
 
 type Opts struct {
@@ -25,7 +26,29 @@ type Opts struct {
 	// data structures.  Any structure that can be (un)marshalled by the json
 	// package can be used.
 	//
-	Data         interface{}    // Data to JSON-encode and POST
-	Error        interface{}    // Error response is unmarshalled into Error
+	Data  interface{} // Data to JSON-encode and POST
+	Error interface{} // Error response is unmarshalled into Error
+}
+
+// A Request describes an HTTP request to be executed, data structures into
+// which results and errors will be unmarshalled, and the server's response.
+// By using a single object for both the request and the response we allow easy
+// access to Result and Error objects without needing type assertions.
+type Request struct {
+	Opts
+	Url    string // Raw URL string
+	Method string // HTTP method to use
+	//
+	// The following interfaces fields should be populated with *pointers* to
+	// data structures.  Any structure that can be (un)marshalled by the json
+	// package can be used.
+	//
+	Result interface{} // Successful response is unmarshalled into Result
+	//
+	// The following fields are populated by Send().
+	//
+	Timestamp    time.Time      // Time when HTTP request was sent
+	RawText      string         // Raw text of server response (JSON or otherwise)
+	Status       int            // HTTP status for executed request
 	HttpResponse *http.Response // Response object from http package
 }
