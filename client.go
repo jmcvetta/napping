@@ -173,7 +173,7 @@ func (c *Client) Do(rr *RequestResponse) (status int, err error) {
 		log.Println(err)
 		return
 	}
-	rr.RawText = string(data)
+	rr.RawText = strings.TrimSpace(string(data))
 	json.Unmarshal(data, &rr.Error) // Ignore errors
 	if rr.RawText != "" && status < 300 {
 		err = json.Unmarshal(data, &rr.Result) // Ignore errors
