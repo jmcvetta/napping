@@ -159,7 +159,7 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 
 	}
 	if mergedOpts.ExpectedStatus != 0 && r.status != mergedOpts.ExpectedStatus {
-		log.Printf("Expected status %s but got %s", mergedOpts.ExpectedStatus, r.status)
+		log.Printf("Expected status %v but got %v", mergedOpts.ExpectedStatus, r.status)
 		return response, UnexpectedStatus
 	}
 	return
