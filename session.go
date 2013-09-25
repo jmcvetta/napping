@@ -32,7 +32,7 @@ type Session struct {
 }
 
 // Send constructs and sends an HTTP request.
-func (s *Session) Send(r *Request) (status int, err error) {
+func (s *Session) Send(r *Request) (response *Response, err error) {
 	r.Method = strings.ToUpper(r.Method)
 	//
 	// Create a URL object from the raw url string.  This will allow us to compose
@@ -59,9 +59,9 @@ func (s *Session) Send(r *Request) (status int, err error) {
 	// request body
 	//
 	var req *http.Request
-	if r.Data != nil {
+	if r.Payload != nil {
 		var b []byte
-		b, err = json.Marshal(&r.Data)
+		b, err = json.Marshal(&r.Payload)
 		if err != nil {
 			log.Println(err)
 			return
@@ -110,7 +110,7 @@ func (s *Session) Send(r *Request) (status int, err error) {
 		log.Println("--------------------------------------------------------------------------------")
 		prettyPrint(req)
 		log.Print("Payload: ")
-		prettyPrint(r.Data)
+		prettyPrint(r.Payload)
 	}
 	r.timestamp = time.Now()
 	resp, err := s.Client.Do(req)
@@ -127,17 +127,19 @@ func (s *Session) Send(r *Request) (status int, err error) {
 		return
 	}
 	err = json.Unmarshal(r.body, &r.Result)
+	rsp := Response(*r)
+	response = &rsp
 	if s.Log {
 		log.Println("--------------------------------------------------------------------------------")
 		log.Println("RESPONSE")
 		log.Println("--------------------------------------------------------------------------------")
-		log.Println("Status: ", r.status)
-		if r.body != nil {
+		log.Println("Status: ", response.status)
+		if response.body != nil {
 			raw := json.RawMessage{}
-			if json.Unmarshal(r.body, &raw) == nil {
+			if json.Unmarshal(response.body, &raw) == nil {
 				prettyPrint(&raw)
 			} else {
-				prettyPrint(r.RawText)
+				prettyPrint(response.RawText())
 			}
 		} else {
 			log.Println("Empty response body")
@@ -146,42 +148,87 @@ func (s *Session) Send(r *Request) (status int, err error) {
 	}
 	if o.ExpectedStatus != 0 && r.status != o.ExpectedStatus {
 		log.Printf("Expected status %s but got %s", o.ExpectedStatus, r.status)
-		return status, UnexpectedStatus
+		return response, UnexpectedStatus
 	}
 	return
 }
 
 // Get sends a GET request.
-func (s *Session) Get(url string, p *Params, response interface{}, o *Opts) (status int, err error) {
-	return 0, nil
+func (s *Session) Get(url string, p *Params, result interface{}, o *Opts) (response *Response, err error) {
+	r := Request{
+		Method: "GET",
+		Url:    url,
+		Params: p,
+		Opts:   o,
+		Result: result,
+	}
+	return s.Send(&r)
 }
 
 // Options sends an OPTIONS request.
-func (s *Session) Options(url string, response interface{}, o *Opts) (status int, err error) {
-	return 0, nil
+func (s *Session) Options(url string, result interface{}, o *Opts) (response *Response, err error) {
+	r := Request{
+		Method: "OPTIONS",
+		Url:    url,
+		Opts:   o,
+		Result: result,
+	}
+	return s.Send(&r)
 }
 
 // Head sends a HEAD request.
-func (s *Session) Head(url string, response interface{}, o *Opts) (status int, err error) {
-	return 0, nil
+func (s *Session) Head(url string, result interface{}, o *Opts) (response *Response, err error) {
+	r := Request{
+		Method: "HEAD",
+		Url:    url,
+		Opts:   o,
+		Result: result,
+	}
+	return s.Send(&r)
 }
 
 // Post sends a POST request.
-func (s *Session) Post(url string, data, response interface{}, o *Opts) (status int, err error) {
-	return 0, nil
+func (s *Session) Post(url string, payload, result interface{}, o *Opts) (response *Response, err error) {
+	r := Request{
+		Method:  "POST",
+		Url:     url,
+		Opts:    o,
+		Payload: payload,
+		Result:  result,
+	}
+	return s.Send(&r)
 }
 
 // Put sends a PUT request.
-func (s *Session) Put(url string, data, response interface{}, o *Opts) (status int, err error) {
-	return 0, nil
+func (s *Session) Put(url string, payload, result interface{}, o *Opts) (response *Response, err error) {
+	r := Request{
+		Method:  "PUT",
+		Url:     url,
+		Opts:    o,
+		Payload: payload,
+		Result:  result,
+	}
+	return s.Send(&r)
 }
 
 // Patch sends a PATCH request.
-func (s *Session) Patch(url string, data, response interface{}, o *Opts) (status int, err error) {
-	return 0, nil
+func (s *Session) Patch(url string, payload, result interface{}, o *Opts) (response *Response, err error) {
+	r := Request{
+		Method:  "PATCH",
+		Url:     url,
+		Opts:    o,
+		Payload: payload,
+		Result:  result,
+	}
+	return s.Send(&r)
 }
 
 // Delete sends a DELETE request.
-func (s *Session) Delete(url string, o *Opts) (status int, err error) {
-	return 0, nil
+func (s *Session) Delete(url string, o *Opts) (response *Response, err error) {
+	r := Request{
+		Method: "DELETE",
+		Url:    url,
+		Opts:   o,
+	}
+	return s.Send(&r)
 }

@@ -6,9 +6,17 @@
 package napping
 
 import (
+	"errors"
 	"net/http"
 	"net/url"
 )
+
+// A Params is a map containing URL parameters.
+type Params map[string]string
+
+// A UnexpectedStatus error is returned when ExpectedStatus is set, and the
+// server return a status code other than what is expected.
+var UnexpectedStatus = errors.New("Server returned unexpected status.")
 
 type Opts struct {
 	Userinfo *url.Userinfo // Optional username/password to authenticate this request

@@ -16,11 +16,11 @@ import (
 // a  single object for both the request and the response we allow easy access
 // to Result and Error objects without needing type assertions.
 type Request struct {
-	Opts   *Opts
-	Url    string      // Raw URL string
-	Method string      // HTTP method to use
-	Params *Params     // URL parameters for GET requests (ignored otherwise)
-	Data   interface{} // Data to JSON-encode and POST
+	Opts    *Opts
+	Url     string      // Raw URL string
+	Method  string      // HTTP method to use
+	Params  *Params     // URL parameters for GET requests (ignored otherwise)
+	Payload interface{} // Data to JSON-encode and POST
 
 	// Result is a pointer to a data structure.  On success, response from
 	// server is unmarshalled into Result.
@@ -33,29 +33,32 @@ type Request struct {
 	body      []byte         // Body of server's response (JSON or otherwise)
 }
 
+// A Response is a Request object that has been executed.
+type Response Request
+
 // Timestamp returns the time when HTTP request was sent.
-func (r *Request) Timestamp() time.Time {
+func (r *Response) Timestamp() time.Time {
 	return r.timestamp
 }
 
 // RawText returns the body of the server's response as raw text.
-func (r *Request) RawText() string {
+func (r *Response) RawText() string {
 	return string(r.body)
 }
 
 // Status returns the HTTP status for the executed request, or 0 if request has
 // not yet been sent.
-func (r *Request) Status() int {
+func (r *Response) Status() int {
 	return r.status
 }
 
 // HttpResponse returns the underlying Response object from http package.
-func (r *Request) HttpResponse() *http.Response {
+func (r *Response) HttpResponse() *http.Response {
 	return r.response
 }
 
 // Unmarshal parses the JSON-encoded data in the server's response, and stores
 // the result in the value pointed to by v.
-func (r *Request) Unmarshall(v interface{}) error {
+func (r *Response) Unmarshall(v interface{}) error {
 	return json.Unmarshal(r.body, v)
 }

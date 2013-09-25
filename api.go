@@ -11,37 +11,50 @@ This module implements the Napping API.
 
 import ()
 
+// Send composes and sends and HTTP request.
+func Send(r *Request) (response *Response, err error) {
+	s := Session{}
+	return s.Send(r)
+}
+
 // Get sends a GET request.
-func Get(url string, p *Params, response interface{}, o *Opts) (status int, err error) {
-	return 0, nil
+func Get(url string, p *Params, result interface{}, o *Opts) (response *Response, err error) {
+	s := Session{}
+	return s.Get(url, p, result, o)
 }
 
 // Options sends an OPTIONS request.
-func Options(url string, response interface{}, o *Opts) (status int, err error) {
-	return 0, nil
+func Options(url string, result interface{}, o *Opts) (response *Response, err error) {
+	s := Session{}
+	return s.Options(url, result, o)
 }
 
 // Head sends a HEAD request.
-func Head(url string, response interface{}, o *Opts) (status int, err error) {
-	return 0, nil
+func Head(url string, result interface{}, o *Opts) (response *Response, err error) {
+	s := Session{}
+	return s.Head(url, result, o)
 }
 
 // Post sends a POST request.
-func Post(url string, data, response interface{}, o *Opts) (status int, err error) {
-	return 0, nil
+func Post(url string, payload, result interface{}, o *Opts) (response *Response, err error) {
+	s := Session{}
+	return s.Post(url, payload, result, o)
 }
 
 // Put sends a PUT request.
-func Put(url string, data, response interface{}, o *Opts) (status int, err error) {
-	return 0, nil
+func Put(url string, payload, result interface{}, o *Opts) (response *Response, err error) {
+	s := Session{}
+	return s.Put(url, payload, result, o)
 }
 
 // Patch sends a PATCH request.
-func Patch(url string, data, response interface{}, o *Opts) (status int, err error) {
-	return 0, nil
+func Patch(url string, payload, result interface{}, o *Opts) (response *Response, err error) {
+	s := Session{}
+	return s.Patch(url, payload, result, o)
 }
 
 // Delete sends a DELETE request.
-func Delete(url string, o *Opts) (status int, err error) {
-	return 0, nil
+func Delete(url string, o *Opts) (response *Response, err error) {
+	s := Session{}
+	return s.Delete(url, o)
 }

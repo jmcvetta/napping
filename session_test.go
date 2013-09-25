@@ -46,7 +46,7 @@ var reqTests = []struct {
 }
 
 type pair struct {
-	rr RequestResponse
+	r  Request
 	hf hfunc
 }
 
@@ -129,11 +129,11 @@ func TestRequest(t *testing.T) {
 	// HTTP methods?
 	pairs := []pair{}
 	for _, test := range reqTests {
-		baseRR := RequestResponse{
+		baseReq := Request{
 			Method: test.method,
 		}
-		allRR := baseRR // allRR has all supported attribues for this verb
-		var allHF hfunc // allHF is combination of all relevant handlers
+		allReq := baseReq // allRR has all supported attribues for this verb
+		var allHF hfunc   // allHF is combination of all relevant handlers
 		//
 		// Generate a random key/value pair
 		//
@@ -148,7 +148,7 @@ func TestRequest(t *testing.T) {
 		//
 		// Method
 		//
-		r := baseRR
+		r := baseReq
 		f := methodHandler(t, test.method, nil)
 		allHF = methodHandler(t, test.method, allHF)
 		pairs = append(pairs, pair{r, f})
@@ -157,9 +157,9 @@ func TestRequest(t *testing.T) {
 		//
 		h := http.Header{}
 		h.Add(key, value)
-		r = baseRR
-		r.Header = &h
-		allRR.Header = &h
+		r = baseReq
+		r.Opts.Header = &h
+		allReq.Opts.Header = &h
 		f = headerHandler(t, h, nil)
 		allHF = headerHandler(t, h, allHF)
 		pairs = append(pairs, pair{r, f})
@@ -170,9 +170,9 @@ func TestRequest(t *testing.T) {
 			p := Params{key: value}
 			f := paramHandler(t, p, nil)
 			allHF = paramHandler(t, p, allHF)
-			r = baseRR
-			r.Params = p
-			allRR.Params = p
+			r = baseReq
+			r.Params = &p
+			allReq.Params = &p
 			pairs = append(pairs, pair{r, f})
 		}
 		//
@@ -182,15 +182,15 @@ func TestRequest(t *testing.T) {
 			p := payload{value}
 			f = payloadHandler(t, p, nil)
 			allHF = payloadHandler(t, p, allHF)
-			r = baseRR
-			r.Data = p
-			allRR.Data = p
+			r = baseReq
+			r.Payload = p
+			allReq.Payload = p
 			pairs = append(pairs, pair{r, f})
 		}
 		//
 		// All
 		//
-		pairs = append(pairs, pair{allRR, allHF})
+		pairs = append(pairs, pair{allReq, allHF})
 	}
 	for _, p := range pairs {
 		srv := httptest.NewServer(http.HandlerFunc(p.hf))
@@ -198,9 +198,8 @@ func TestRequest(t *testing.T) {
 		//
 		// Good request
 		//
-		client := New()
-		p.rr.Url = "http://" + srv.Listener.Addr().String()
-		_, err := client.Do(&p.rr)
+		p.r.Url = "http://" + srv.Listener.Addr().String()
+		_, err := Send(&p.r)
 		if err != nil {
 			t.Error(err)
 		}
@@ -208,39 +207,35 @@ func TestRequest(t *testing.T) {
 }
 
 func TestInvalidUrl(t *testing.T) {
-	client := New()
 	//
 	//  Missing protocol scheme - url.Parse should fail
 	//
-	rr := RequestResponse{
-		Url:    "://foobar.com",
-		Method: "GET",
-	}
-	_, err := client.Do(&rr)
+
+	url := "://foobar.com"
+	_, err := Get(url, nil, nil, nil)
 	assert.NotEqual(t, nil, err)
 	//
 	// Unsupported protocol scheme - HttpClient.Do should fail
 	//
-	rr = RequestResponse{
-		Url:    "foo://bar.com",
-		Method: "GET",
-	}
-	_, err = client.Do(&rr)
+	url = "foo://bar.com"
+	_, err = Get(url, nil, nil, nil)
 	assert.NotEqual(t, nil, err)
 }
 
 func TestBasicAuth(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(HandleGetBasicAuth))
 	defer srv.Close()
-	client := New()
-	client.UnsafeBasicAuth = true // Otherwise we will get error with httptest
-	r := RequestResponse{
-		Url:            "http://" + srv.Listener.Addr().String(),
-		Method:         "GET",
-		Userinfo:       url.UserPassword("jtkirk", "Beam me up, Scotty!"),
-		ExpectedStatus: 200,
+	s := Session{}
+	s.UnsafeBasicAuth = true // Otherwise we will get error with httptest
+	r := Request{
+		Url:    "http://" + srv.Listener.Addr().String(),
+		Method: "GET",
+		Opts: &Opts{
+			Userinfo:       url.UserPassword("jtkirk", "Beam me up, Scotty!"),
+			ExpectedStatus: 200,
+		},
 	}
-	_, err := client.Do(&r)
+	_, err := s.Send(&r)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -249,13 +244,14 @@ func TestBasicAuth(t *testing.T) {
 func TestUnsafeBasicAuth(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(HandlePost))
 	defer srv.Close()
-	client := New()
-	r := RequestResponse{
-		Url:      "http://" + srv.Listener.Addr().String(),
-		Method:   "GET",
-		Userinfo: url.UserPassword("a", "b"),
+	r := Request{
+		Url:    "http://" + srv.Listener.Addr().String(),
+		Method: "GET",
+		Opts: &Opts{
+			Userinfo: url.UserPassword("a", "b"),
+		},
 	}
-	_, err := client.Do(&r)
+	_, err := Send(&r)
 	assert.NotEqual(t, nil, err)
 }
 
@@ -286,8 +282,8 @@ type errorStruct struct {
 }
 
 var (
-	fooMap    = map[string]string{"foo": "bar"}
-	barMap    = map[string]string{"bar": "baz"}
+	fooParams = Params{"foo": "bar"}
+	barParams = Params{"bar": "baz"}
 	fooStruct = structType{
 		Foo: 111,
 		Bar: "foo",
@@ -304,30 +300,25 @@ func TestGet(t *testing.T) {
 	//
 	// Good request
 	//
-	r := RequestResponse{
-		Url:            "http://" + srv.Listener.Addr().String(),
-		Method:         "GET",
-		Params:         fooMap,
-		Result:         new(structType),
-		ExpectedStatus: 200,
-	}
-	status, err := Do(&r)
+	url := "http://" + srv.Listener.Addr().String()
+	p := fooParams
+	res := structType{}
+	status, err := Get(url, &p, &res, nil)
 	if err != nil {
 		t.Error(err)
 	}
 	assert.Equal(t, 200, status)
-	assert.Equal(t, r.Result, &barStruct)
+	assert.Equal(t, res, &barStruct)
 	//
 	// Bad request
 	//
-	r = RequestResponse{
-		Url:            "http://" + srv.Listener.Addr().String(),
-		Method:         "GET",
-		Params:         map[string]string{"bad": "value"},
-		Error:          new(errorStruct),
+	url = "http://" + srv.Listener.Addr().String()
+	p = Params{"bad": "value"}
+	e := errorStruct{}
+	opts := Opts{
 		ExpectedStatus: 200,
 	}
-	status, err = Do(&r)
+	resp, err := Get(url, &p, nil, &opts)
 	if err != UnexpectedStatus {
 		t.Error(err)
 	}
@@ -336,42 +327,35 @@ func TestGet(t *testing.T) {
 		Message: "Bad query params: bad=value",
 		Status:  500,
 	}
-	e := r.Error.(*errorStruct)
-	assert.Equal(t, *e, expected)
+	resp.Unmarshall(&e)
+	assert.Equal(t, e, expected)
 }
 
 func TestPost(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(HandlePost))
 	defer srv.Close()
-	client := New()
-	client.Log = true
-	r := RequestResponse{
-		Url:    "http://" + srv.Listener.Addr().String(),
-		Method: "POST",
-		Data:   fooStruct,
-		Result: new(structType),
-	}
-	status, err := client.Do(&r)
+	s := Session{}
+	s.Log = true
+	url := "http://" + srv.Listener.Addr().String()
+	payload := fooStruct
+	res := new(structType)
+	resp, err := s.Post(url, payload, res, nil)
 	if err != nil {
 		t.Error(err)
 	}
-	assert.Equal(t, status, 200)
-	assert.Equal(t, r.Result, &barStruct)
+	assert.Equal(t, resp.Status(), 200)
+	assert.Equal(t, res, barStruct)
 }
 
 func TestPostUnmarshallable(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(HandlePost))
 	defer srv.Close()
-	client := New()
 	type ft func()
 	var f ft
-	r := RequestResponse{
-		Url:    "http://" + srv.Listener.Addr().String(),
-		Method: "POST",
-		Result: new(structType),
-		Data:   &f,
-	}
-	_, err := client.Do(&r)
+	url := "http://" + srv.Listener.Addr().String()
+	res := structType{}
+	payload := f
+	_, err := Post(url, &payload, &res, nil)
 	assert.NotEqual(t, nil, err)
 	_, ok := err.(*json.UnsupportedTypeError)
 	if !ok {
@@ -383,20 +367,15 @@ func TestPostUnmarshallable(t *testing.T) {
 func TestPut(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(HandlePut))
 	defer srv.Close()
-	client := New()
-	r := RequestResponse{
-		Url:    "http://" + srv.Listener.Addr().String(),
-		Method: "PUT",
-		Data:   fooStruct,
-		Result: new(structType),
-	}
-	status, err := client.Do(&r)
+	url := "http://" + srv.Listener.Addr().String()
+	res := structType{}
+	resp, err := Put(url, &fooStruct, &res, nil)
 	if err != nil {
 		t.Error(err)
 	}
-	assert.Equal(t, status, 200)
+	assert.Equal(t, resp.Status(), 200)
 	// Server should return NO data
-	assert.Equal(t, r.RawText, "")
+	assert.Equal(t, resp.RawText(), "")
 }
 
 func JsonError(w http.ResponseWriter, msg string, code int) {
@@ -415,8 +394,8 @@ func JsonError(w http.ResponseWriter, msg string, code int) {
 func HandleGet(w http.ResponseWriter, req *http.Request) {
 	u := req.URL
 	q := u.Query()
-	for k, _ := range fooMap {
-		if fooMap[k] != q.Get(k) {
+	for k, _ := range fooParams {
+		if fooParams[k] != q.Get(k) {
 			msg := "Bad query params: " + u.Query().Encode()
 			JsonError(w, msg, http.StatusInternalServerError)
 			return
