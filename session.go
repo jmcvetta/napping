@@ -82,9 +82,13 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 
 	}
 	req.Header.Add("Accept", "application/json") // Default, can be overridden with Opts
-	o := s.Opts.update(r.Opts)
-	if o.Header != nil {
-		for key, values := range *o.Header {
+	sessOpts := s.Opts
+	if sessOpts == nil {
+		sessOpts = &Opts{}
+	}
+	mergedOpts := sessOpts.update(r.Opts)
+	if mergedOpts.Header != nil {
+		for key, values := range *mergedOpts.Header {
 			if len(values) > 0 {
 				req.Header.Set(key, values[0]) // Possible to overwrite Content-Type
 			}
@@ -93,13 +97,13 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 	//
 	// Set HTTP Basic authentication if userinfo is supplied
 	//
-	if o.Userinfo != nil {
+	if mergedOpts.Userinfo != nil {
 		if !s.UnsafeBasicAuth && u.Scheme != "https" {
 			err = errors.New("Unsafe to use HTTP Basic authentication without HTTPS")
 			return
 		}
-		pwd, _ := o.Userinfo.Password()
-		req.SetBasicAuth(o.Userinfo.Username(), pwd)
+		pwd, _ := mergedOpts.Userinfo.Password()
+		req.SetBasicAuth(mergedOpts.Userinfo.Username(), pwd)
 	}
 	//
 	// Execute the HTTP request
@@ -113,7 +117,13 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 		prettyPrint(r.Payload)
 	}
 	r.timestamp = time.Now()
-	resp, err := s.Client.Do(req)
+	var client *http.Client
+	if s.Client != nil {
+		client = s.Client
+	} else {
+		client = &http.Client{}
+	}
+	resp, err := client.Do(req)
 	if err != nil {
 		log.Println(err)
 		return
@@ -126,7 +136,9 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 		log.Println(err)
 		return
 	}
-	err = json.Unmarshal(r.body, &r.Result)
+	if string(r.body) != "" {
+		err = json.Unmarshal(r.body, &r.Result)
+	}
 	rsp := Response(*r)
 	response = &rsp
 	if s.Log {
@@ -146,8 +158,8 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 		}
 
 	}
-	if o.ExpectedStatus != 0 && r.status != o.ExpectedStatus {
-		log.Printf("Expected status %s but got %s", o.ExpectedStatus, r.status)
+	if mergedOpts.ExpectedStatus != 0 && r.status != mergedOpts.ExpectedStatus {
+		log.Printf("Expected status %s but got %s", mergedOpts.ExpectedStatus, r.status)
 		return response, UnexpectedStatus
 	}
 	return

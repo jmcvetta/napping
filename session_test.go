@@ -131,6 +131,7 @@ func TestRequest(t *testing.T) {
 	for _, test := range reqTests {
 		baseReq := Request{
 			Method: test.method,
+			Opts:   &Opts{},
 		}
 		allReq := baseReq // allRR has all supported attribues for this verb
 		var allHF hfunc   // allHF is combination of all relevant handlers
@@ -303,12 +304,12 @@ func TestGet(t *testing.T) {
 	url := "http://" + srv.Listener.Addr().String()
 	p := fooParams
 	res := structType{}
-	status, err := Get(url, &p, &res, nil)
+	resp, err := Get(url, &p, &res, nil)
 	if err != nil {
 		t.Error(err)
 	}
-	assert.Equal(t, 200, status)
-	assert.Equal(t, res, &barStruct)
+	assert.Equal(t, 200, resp.Status())
+	assert.Equal(t, res, barStruct)
 	//
 	// Bad request
 	//
@@ -318,11 +319,11 @@ func TestGet(t *testing.T) {
 	opts := Opts{
 		ExpectedStatus: 200,
 	}
-	resp, err := Get(url, &p, nil, &opts)
+	resp, err = Get(url, &p, nil, &opts)
 	if err != UnexpectedStatus {
 		t.Error(err)
 	}
-	assert.Equal(t, status, 500)
+	assert.Equal(t, 500, resp.Status())
 	expected := errorStruct{
 		Message: "Bad query params: bad=value",
 		Status:  500,
@@ -338,12 +339,12 @@ func TestPost(t *testing.T) {
 	s.Log = true
 	url := "http://" + srv.Listener.Addr().String()
 	payload := fooStruct
-	res := new(structType)
-	resp, err := s.Post(url, payload, res, nil)
+	res := structType{}
+	resp, err := s.Post(url, &payload, &res, nil)
 	if err != nil {
 		t.Error(err)
 	}
-	assert.Equal(t, resp.Status(), 200)
+	assert.Equal(t, 200, resp.Status())
 	assert.Equal(t, res, barStruct)
 }
 

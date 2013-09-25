@@ -31,14 +31,22 @@ type Opts struct {
 // instance where there is disagreement.
 func (this *Opts) update(other *Opts) *Opts {
 	merged := this
+	if other == nil {
+		return merged
+	}
 	if other.Userinfo != nil {
 		merged.Userinfo = other.Userinfo
 	}
-	h := *merged.Header
-	for k, v := range *other.Header {
-		h[k] = v
+	if merged.Header == nil {
+		merged.Header = &http.Header{}
 	}
-	merged.Header = &h
+	if other.Header != nil {
+		h := *merged.Header
+		for k, v := range *other.Header {
+			h[k] = v
+		}
+		merged.Header = &h
+	}
 	if other.ExpectedStatus != 0 {
 		merged.ExpectedStatus = other.ExpectedStatus
 	}
