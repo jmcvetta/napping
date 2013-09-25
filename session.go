@@ -5,32 +5,27 @@
 
 package napping
 
-import "io/ioutil"
-
-import "errors"
-
-import "bytes"
-
-import "encoding/json"
-
-import "net/http"
-
-import "time"
-
-import "net/url"
-
-import "log"
-
-import "strings"
-
 /*
 This module provides a Session object to manage and persist settings across
 requests (cookies, auth, proxies).
 */
 
+import (
+	"bytes"
+	"encoding/json"
+	"errors"
+	"io/ioutil"
+	"log"
+	"net/http"
+	"net/url"
+	"strings"
+	"time"
+)
+
 import ()
 
 type Session struct {
+	Opts            *Opts
 	Client          *http.Client
 	UnsafeBasicAuth bool // Allow Basic Auth over unencrypted HTTP
 	Log             bool // Log request and response
@@ -60,18 +55,11 @@ func (s *Session) Send(r *Request) (status int, err error) {
 		u.RawQuery = vals.Encode()
 	}
 	//
-	// Create a Request object; if populated, Data field is JSON encoded as request
-	// body
+	// Create a Request object; if populated, Data field is JSON encoded as
+	// request body
 	//
-	r.Timestamp = time.Now()
-	m := string(r.Method)
 	var req *http.Request
-	// http.NewRequest can only return an error if url.Parse fails.  Since the
-	// url has already been successfully parsed once at this point, there is no
-	// danger of this, so we can ignore errors returned by http.NewRequest.
-	if r.Data == nil {
-		req, _ = http.NewRequest(m, u.String(), nil)
-	} else {
+	if r.Data != nil {
 		var b []byte
 		b, err = json.Marshal(&r.Data)
 		if err != nil {
@@ -79,36 +67,39 @@ func (s *Session) Send(r *Request) (status int, err error) {
 			return
 		}
 		buf := bytes.NewBuffer(b)
-		req, err = http.NewRequest(m, u.String(), buf)
+		req, err = http.NewRequest(r.Method, u.String(), buf)
 		if err != nil {
 			log.Println(err)
 			return
 		}
 		req.Header.Add("Content-Type", "application/json")
+	} else { // no data to encode
+		req, err = http.NewRequest(r.Method, u.String(), nil)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
 	}
-	if r.Header != nil {
-		for key, values := range *r.Header {
+	req.Header.Add("Accept", "application/json") // Default, can be overridden with Opts
+	o := s.Opts.update(r.Opts)
+	if o.Header != nil {
+		for key, values := range *o.Header {
 			if len(values) > 0 {
 				req.Header.Set(key, values[0]) // Possible to overwrite Content-Type
 			}
 		}
 	}
 	//
-	// If Accept header is unset, set it for JSON.
-	//
-	if req.Header.Get("Accept") == "" {
-		req.Header.Add("Accept", "application/json")
-	}
-	//
 	// Set HTTP Basic authentication if userinfo is supplied
 	//
-	if r.Userinfo != nil {
+	if o.Userinfo != nil {
 		if !s.UnsafeBasicAuth && u.Scheme != "https" {
 			err = errors.New("Unsafe to use HTTP Basic authentication without HTTPS")
 			return
 		}
-		pwd, _ := r.Userinfo.Password()
-		req.SetBasicAuth(r.Userinfo.Username(), pwd)
+		pwd, _ := o.Userinfo.Password()
+		req.SetBasicAuth(o.Userinfo.Username(), pwd)
 	}
 	//
 	// Execute the HTTP request
@@ -121,34 +112,29 @@ func (s *Session) Send(r *Request) (status int, err error) {
 		log.Print("Payload: ")
 		prettyPrint(r.Data)
 	}
+	r.timestamp = time.Now()
 	resp, err := s.Client.Do(req)
 	if err != nil {
 		log.Println(err)
 		return
 	}
 	defer resp.Body.Close()
-	status = resp.StatusCode
-	r.HttpResponse = resp
-	r.Status = resp.StatusCode
-	var data []byte
-	data, err = ioutil.ReadAll(resp.Body)
+	r.status = resp.StatusCode
+	r.response = resp
+	r.body, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Println(err)
 		return
 	}
-	r.RawText = string(data)
-	json.Unmarshal(data, &r.Error) // Ignore errors
-	if r.RawText != "" && status < 300 {
-		err = json.Unmarshal(data, &r.Result) // Ignore errors
-	}
+	err = json.Unmarshal(r.body, &r.Result)
 	if s.Log {
 		log.Println("--------------------------------------------------------------------------------")
 		log.Println("RESPONSE")
 		log.Println("--------------------------------------------------------------------------------")
-		log.Println("Status: ", status)
-		if r.RawText != "" {
+		log.Println("Status: ", r.status)
+		if r.body != nil {
 			raw := json.RawMessage{}
-			if json.Unmarshal(data, &raw) == nil {
+			if json.Unmarshal(r.body, &raw) == nil {
 				prettyPrint(&raw)
 			} else {
 				prettyPrint(r.RawText)
@@ -158,8 +144,8 @@ func (s *Session) Send(r *Request) (status int, err error) {
 		}
 
 	}
-	if r.ExpectedStatus != 0 && status != r.ExpectedStatus {
-		log.Printf("Expected status %s but got %s", r.ExpectedStatus, status)
+	if o.ExpectedStatus != 0 && r.status != o.ExpectedStatus {
+		log.Printf("Expected status %s but got %s", o.ExpectedStatus, r.status)
 		return status, UnexpectedStatus
 	}
 	return
