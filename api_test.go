@@ -7,11 +7,13 @@ package napping
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/bmizerany/assert"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
@@ -95,6 +97,17 @@ func TestGet(t *testing.T) {
 	assert.Equal(t, e, expected)
 }
 
+func TestDelete(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(HandleDelete))
+	defer srv.Close()
+	url := "http://" + srv.Listener.Addr().String()
+	resp, err := Delete(url, nil)
+	if err != nil {
+		t.Error(err)
+	}
+	assert.Equal(t, 200, resp.Status())
+}
+
 func TestPost(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(HandlePost))
 	defer srv.Close()
@@ -142,6 +155,20 @@ func TestPut(t *testing.T) {
 	assert.Equal(t, resp.RawText(), "")
 }
 
+func TestPatch(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(HandlePatch))
+	defer srv.Close()
+	url := "http://" + srv.Listener.Addr().String()
+	res := structType{}
+	resp, err := Patch(url, &fooStruct, &res, nil)
+	if err != nil {
+		t.Error(err)
+	}
+	assert.Equal(t, resp.Status(), 200)
+	// Server should return NO data
+	assert.Equal(t, resp.RawText(), "")
+}
+
 func JsonError(w http.ResponseWriter, msg string, code int) {
 	e := errorStruct{
 		Status:  code,
@@ -156,6 +183,12 @@ func JsonError(w http.ResponseWriter, msg string, code int) {
 }
 
 func HandleGet(w http.ResponseWriter, req *http.Request) {
+	method := strings.ToUpper(req.Method)
+	if method != "GET" {
+		msg := fmt.Sprintf("Expected method GET, received %v", method)
+		http.Error(w, msg, 500)
+		return
+	}
 	u := req.URL
 	q := u.Query()
 	for k, _ := range fooParams {
@@ -177,7 +210,22 @@ func HandleGet(w http.ResponseWriter, req *http.Request) {
 	w.Write(blob)
 }
 
+func HandleDelete(w http.ResponseWriter, req *http.Request) {
+	method := strings.ToUpper(req.Method)
+	if method != "DELETE" {
+		msg := fmt.Sprintf("Expected method DELETE, received %v", method)
+		http.Error(w, msg, 500)
+		return
+	}
+}
+
 func HandlePost(w http.ResponseWriter, req *http.Request) {
+	method := strings.ToUpper(req.Method)
+	if method != "POST" {
+		msg := fmt.Sprintf("Expected method POST, received %v", method)
+		http.Error(w, msg, 500)
+		return
+	}
 	//
 	// Parse Payload
 	//
@@ -215,6 +263,46 @@ func HandlePost(w http.ResponseWriter, req *http.Request) {
 }
 
 func HandlePut(w http.ResponseWriter, req *http.Request) {
+	method := strings.ToUpper(req.Method)
+	if method != "PUT" {
+		msg := fmt.Sprintf("Expected method PUT, received %v", method)
+		http.Error(w, msg, 500)
+		return
+	}
+	//
+	// Parse Payload
+	//
+	if req.ContentLength <= 0 {
+		msg := "Content-Length must be greater than 0."
+		JsonError(w, msg, http.StatusLengthRequired)
+		return
+	}
+	body, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		JsonError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	var s structType
+	err = json.Unmarshal(body, &s)
+	if err != nil {
+		JsonError(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	if s != fooStruct {
+		msg := "Bad request body"
+		JsonError(w, msg, http.StatusBadRequest)
+		return
+	}
+	return
+}
+
+func HandlePatch(w http.ResponseWriter, req *http.Request) {
+	method := strings.ToUpper(req.Method)
+	if method != "PATCH" {
+		msg := fmt.Sprintf("Expected method PATCH, received %v", method)
+		http.Error(w, msg, 500)
+		return
+	}
 	//
 	// Parse Payload
 	//
