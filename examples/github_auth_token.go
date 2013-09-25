@@ -44,7 +44,7 @@ func main() {
 	//
 	// http://developer.github.com/v3/oauth/#create-a-new-authorization
 	//
-	d := struct {
+	payload := struct {
 		Scopes []string `json:"scopes"`
 		Note   string   `json:"note"`
 	}{
@@ -74,19 +74,16 @@ func main() {
 	//
 	// Setup HTTP Basic auth (ONLY use this with SSL)
 	//
-	u := url.UserPassword(username, passwd)
-	rr := napping.RequestResponse{
-		Url:      "https://api.github.com/authorizations",
-		Userinfo: u,
-		Method:   "POST",
-		Data:     &d,
-		Result:   &res,
-		Error:    &e,
+	userinfo := url.UserPassword(username, passwd)
+	url := "https://api.github.com/authorizations"
+	o := napping.Opts{
+		Userinfo: userinfo,
 	}
+	//	Method:   "POST"
 	//
 	// Send request to server
 	//
-	status, err := napping.Do(&rr)
+	resp, err := napping.Post(url, &payload, &res, &o)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -94,11 +91,11 @@ func main() {
 	// Process response
 	//
 	println("")
-	if status == 201 {
+	if resp.Status() == 201 {
 		fmt.Printf("Github auth token: %s\n\n", res.Token)
 	} else {
 		fmt.Println("Bad response status from Github server")
-		fmt.Printf("\t Status:  %v\n", status)
+		fmt.Printf("\t Status:  %v\n", resp.Status())
 		fmt.Printf("\t Message: %v\n", e.Message)
 	}
 	println("")
