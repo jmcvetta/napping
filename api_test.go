@@ -108,6 +108,30 @@ func TestDelete(t *testing.T) {
 	assert.Equal(t, 200, resp.Status())
 }
 
+func TestHead(t *testing.T) {
+	// TODO: test result
+	srv := httptest.NewServer(http.HandlerFunc(HandleHead))
+	defer srv.Close()
+	url := "http://" + srv.Listener.Addr().String()
+	resp, err := Head(url, nil, nil)
+	if err != nil {
+		t.Error(err)
+	}
+	assert.Equal(t, 200, resp.Status())
+}
+
+func TestOptions(t *testing.T) {
+	// TODO: test result
+	srv := httptest.NewServer(http.HandlerFunc(HandleOptions))
+	defer srv.Close()
+	url := "http://" + srv.Listener.Addr().String()
+	resp, err := Options(url, nil, nil)
+	if err != nil {
+		t.Error(err)
+	}
+	assert.Equal(t, 200, resp.Status())
+}
+
 func TestPost(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(HandlePost))
 	defer srv.Close()
@@ -214,6 +238,24 @@ func HandleDelete(w http.ResponseWriter, req *http.Request) {
 	method := strings.ToUpper(req.Method)
 	if method != "DELETE" {
 		msg := fmt.Sprintf("Expected method DELETE, received %v", method)
+		http.Error(w, msg, 500)
+		return
+	}
+}
+
+func HandleHead(w http.ResponseWriter, req *http.Request) {
+	method := strings.ToUpper(req.Method)
+	if method != "HEAD" {
+		msg := fmt.Sprintf("Expected method HEAD, received %v", method)
+		http.Error(w, msg, 500)
+		return
+	}
+}
+
+func HandleOptions(w http.ResponseWriter, req *http.Request) {
+	method := strings.ToUpper(req.Method)
+	if method != "OPTIONS" {
+		msg := fmt.Sprintf("Expected method OPTIONS, received %v", method)
 		http.Error(w, msg, 500)
 		return
 	}
