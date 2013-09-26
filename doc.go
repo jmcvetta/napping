@@ -4,7 +4,7 @@
 // slavery.
 
 /*
-Package restclient is a client library for interacting with RESTful APIs.
+Package napping is a client library for interacting with RESTful APIs.
 
 Example:
 
@@ -18,13 +18,13 @@ Example:
 		Bar: "baz",
 	}
 	s := Spam{}
-	r := restclient.RequestResponse{
+	r := napping.RequestResponse{
 		Url:    "http://foo.com/bar",
-		Method: restclient.POST,
+		Method: napping.POST,
 		Data:   &f,
 		Result: &s,
 	}
-	status, err := restclient.Do(&r)
+	status, err := napping.Do(&r)
 	if err != nil {
 		panic(err)
 	}
@@ -32,4 +32,4 @@ Example:
 		println(s.Eggs)
 	}
 */
-package restclient
+package napping
