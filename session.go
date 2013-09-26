@@ -169,45 +169,41 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 }
 
 // Get sends a GET request.
-func (s *Session) Get(url string, p *Params, result interface{}, o *Opts) (response *Response, err error) {
+func (s *Session) Get(url string, p *Params, result interface{}) (response *Response, err error) {
 	r := Request{
 		Method: "GET",
 		Url:    url,
 		Params: p,
-		Opts:   o,
 		Result: result,
 	}
 	return s.Send(&r)
 }
 
 // Options sends an OPTIONS request.
-func (s *Session) Options(url string, result interface{}, o *Opts) (response *Response, err error) {
+func (s *Session) Options(url string, result interface{}) (response *Response, err error) {
 	r := Request{
 		Method: "OPTIONS",
 		Url:    url,
-		Opts:   o,
 		Result: result,
 	}
 	return s.Send(&r)
 }
 
 // Head sends a HEAD request.
-func (s *Session) Head(url string, result interface{}, o *Opts) (response *Response, err error) {
+func (s *Session) Head(url string, result interface{}) (response *Response, err error) {
 	r := Request{
 		Method: "HEAD",
 		Url:    url,
-		Opts:   o,
 		Result: result,
 	}
 	return s.Send(&r)
 }
 
 // Post sends a POST request.
-func (s *Session) Post(url string, payload, result interface{}, o *Opts) (response *Response, err error) {
+func (s *Session) Post(url string, payload, result interface{}) (response *Response, err error) {
 	r := Request{
 		Method:  "POST",
 		Url:     url,
-		Opts:    o,
 		Payload: payload,
 		Result:  result,
 	}
@@ -215,11 +211,10 @@ func (s *Session) Post(url string, payload, result interface{}, o *Opts) (respon
 }
 
 // Put sends a PUT request.
-func (s *Session) Put(url string, payload, result interface{}, o *Opts) (response *Response, err error) {
+func (s *Session) Put(url string, payload, result interface{}) (response *Response, err error) {
 	r := Request{
 		Method:  "PUT",
 		Url:     url,
-		Opts:    o,
 		Payload: payload,
 		Result:  result,
 	}
@@ -227,11 +222,10 @@ func (s *Session) Put(url string, payload, result interface{}, o *Opts) (respons
 }
 
 // Patch sends a PATCH request.
-func (s *Session) Patch(url string, payload, result interface{}, o *Opts) (response *Response, err error) {
+func (s *Session) Patch(url string, payload, result interface{}) (response *Response, err error) {
 	r := Request{
 		Method:  "PATCH",
 		Url:     url,
-		Opts:    o,
 		Payload: payload,
 		Result:  result,
 	}
@@ -239,11 +233,10 @@ func (s *Session) Patch(url string, payload, result interface{}, o *Opts) (respo
 }
 
 // Delete sends a DELETE request.
-func (s *Session) Delete(url string, o *Opts) (response *Response, err error) {
+func (s *Session) Delete(url string) (response *Response, err error) {
 	r := Request{
 		Method: "DELETE",
 		Url:    url,
-		Opts:   o,
 	}
 	return s.Send(&r)
 }

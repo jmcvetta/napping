@@ -27,13 +27,13 @@ func TestInvalidUrl(t *testing.T) {
 	//
 
 	url := "://foobar.com"
-	_, err := Get(url, nil, nil, nil)
+	_, err := Get(url, nil, nil)
 	assert.NotEqual(t, nil, err)
 	//
 	// Unsupported protocol scheme - HttpClient.Do should fail
 	//
 	url = "foo://bar.com"
-	_, err = Get(url, nil, nil, nil)
+	_, err = Get(url, nil, nil)
 	assert.NotEqual(t, nil, err)
 }
 
@@ -69,7 +69,7 @@ func TestGet(t *testing.T) {
 	url := "http://" + srv.Listener.Addr().String()
 	p := fooParams
 	res := structType{}
-	resp, err := Get(url, &p, &res, nil)
+	resp, err := Get(url, &p, &res)
 	if err != nil {
 		t.Error(err)
 	}
@@ -81,12 +81,12 @@ func TestGet(t *testing.T) {
 	url = "http://" + srv.Listener.Addr().String()
 	p = Params{"bad": "value"}
 	e := errorStruct{}
-	opts := Opts{
-		ExpectedStatus: 200,
+	resp, err = Get(url, &p, nil)
+	if err != nil {
+		t.Fatal(err)
 	}
-	resp, err = Get(url, &p, nil, &opts)
-	if err != UnexpectedStatus {
-		t.Error(err)
+	if resp.Status() == 200 {
+		t.Error("Server returned 200 success when it should have failed")
 	}
 	assert.Equal(t, 500, resp.Status())
 	expected := errorStruct{
@@ -101,7 +101,7 @@ func TestDelete(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(HandleDelete))
 	defer srv.Close()
 	url := "http://" + srv.Listener.Addr().String()
-	resp, err := Delete(url, nil)
+	resp, err := Delete(url)
 	if err != nil {
 		t.Error(err)
 	}
@@ -113,7 +113,7 @@ func TestHead(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(HandleHead))
 	defer srv.Close()
 	url := "http://" + srv.Listener.Addr().String()
-	resp, err := Head(url, nil, nil)
+	resp, err := Head(url, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -125,7 +125,7 @@ func TestOptions(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(HandleOptions))
 	defer srv.Close()
 	url := "http://" + srv.Listener.Addr().String()
-	resp, err := Options(url, nil, nil)
+	resp, err := Options(url, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -140,7 +140,7 @@ func TestPost(t *testing.T) {
 	url := "http://" + srv.Listener.Addr().String()
 	payload := fooStruct
 	res := structType{}
-	resp, err := s.Post(url, &payload, &res, nil)
+	resp, err := s.Post(url, &payload, &res)
 	if err != nil {
 		t.Error(err)
 	}
@@ -156,7 +156,7 @@ func TestPostUnmarshallable(t *testing.T) {
 	url := "http://" + srv.Listener.Addr().String()
 	res := structType{}
 	payload := f
-	_, err := Post(url, &payload, &res, nil)
+	_, err := Post(url, &payload, &res)
 	assert.NotEqual(t, nil, err)
 	_, ok := err.(*json.UnsupportedTypeError)
 	if !ok {
@@ -170,7 +170,7 @@ func TestPut(t *testing.T) {
 	defer srv.Close()
 	url := "http://" + srv.Listener.Addr().String()
 	res := structType{}
-	resp, err := Put(url, &fooStruct, &res, nil)
+	resp, err := Put(url, &fooStruct, &res)
 	if err != nil {
 		t.Error(err)
 	}
@@ -184,7 +184,7 @@ func TestPatch(t *testing.T) {
 	defer srv.Close()
 	url := "http://" + srv.Listener.Addr().String()
 	res := structType{}
-	resp, err := Patch(url, &fooStruct, &res, nil)
+	resp, err := Patch(url, &fooStruct, &res)
 	if err != nil {
 		t.Error(err)
 	}
