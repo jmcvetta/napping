@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 )
 
@@ -50,7 +51,7 @@ func (r *Response) Timestamp() time.Time {
 
 // RawText returns the body of the server's response as raw text.
 func (r *Response) RawText() string {
-	return string(r.body)
+	return strings.TrimSpace(string(r.body))
 }
 
 // Status returns the HTTP status for the executed request, or 0 if request has
