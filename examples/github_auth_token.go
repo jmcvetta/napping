@@ -72,18 +72,17 @@ func main() {
 		Message string
 	}{}
 	//
-	// Setup HTTP Basic auth (ONLY use this with SSL)
+	// Setup HTTP Basic auth for this session (ONLY use this with SSL).  Auth
+	// can also be configured on a per-request basis when using Send().
 	//
-	userinfo := url.UserPassword(username, passwd)
-	url := "https://api.github.com/authorizations"
-	o := napping.Opts{
-		Userinfo: userinfo,
+	s := napping.Session{
+		Userinfo: url.UserPassword(username, passwd),
 	}
-	//	Method:   "POST"
+	url := "https://api.github.com/authorizations"
 	//
 	// Send request to server
 	//
-	resp, err := napping.Post(url, &payload, &res, &o)
+	resp, err := s.Post(url, &payload, &res)
 	if err != nil {
 		log.Fatal(err)
 	}

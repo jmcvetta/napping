@@ -25,10 +25,13 @@ import (
 import ()
 
 type Session struct {
-	Opts            *Opts
 	Client          *http.Client
 	UnsafeBasicAuth bool // Allow Basic Auth over unencrypted HTTP
 	Log             bool // Log request and response
+
+	// Optional
+	Userinfo *url.Userinfo
+	Header   *http.Header
 }
 
 // Send constructs and sends an HTTP request.
@@ -59,6 +62,10 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 	// request body
 	//
 	var req *http.Request
+	header := http.Header{}
+	if s.Header != nil {
+		header = *s.Header
+	}
 	if r.Payload != nil {
 		var b []byte
 		b, err = json.Marshal(&r.Payload)
@@ -72,7 +79,7 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 			log.Println(err)
 			return
 		}
-		req.Header.Add("Content-Type", "application/json")
+		header.Add("Content-Type", "application/json")
 	} else { // no data to encode
 		req, err = http.NewRequest(r.Method, u.String(), nil)
 		if err != nil {
@@ -81,29 +88,36 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 		}
 
 	}
-	req.Header.Add("Accept", "application/json") // Default, can be overridden with Opts
-	sessOpts := s.Opts
-	if sessOpts == nil {
-		sessOpts = &Opts{}
+	//
+	// Merge Session and Request options
+	//
+	var userinfo *url.Userinfo
+	if s.Userinfo != nil {
+		userinfo = s.Userinfo
 	}
-	mergedOpts := sessOpts.merge(r.Opts)
-	if mergedOpts.Header != nil {
-		for key, values := range *mergedOpts.Header {
-			if len(values) > 0 {
-				req.Header.Set(key, values[0]) // Possible to overwrite Content-Type
-			}
+	// Prefer Request's user credentials
+	if r.Userinfo != nil {
+		userinfo = r.Userinfo
+	}
+	if r.Header != nil {
+		for k, v := range *r.Header {
+			header.Set(k, v[0]) // Is there always guarnateed to be at least one value for a header?
 		}
 	}
+	if header.Get("Accept") == "" {
+		header.Add("Accept", "application/json") // Default, can be overridden with Opts
+	}
+	req.Header = header
 	//
 	// Set HTTP Basic authentication if userinfo is supplied
 	//
-	if mergedOpts.Userinfo != nil {
+	if userinfo != nil {
 		if !s.UnsafeBasicAuth && u.Scheme != "https" {
 			err = errors.New("Unsafe to use HTTP Basic authentication without HTTPS")
 			return
 		}
-		pwd, _ := mergedOpts.Userinfo.Password()
-		req.SetBasicAuth(mergedOpts.Userinfo.Username(), pwd)
+		pwd, _ := userinfo.Password()
+		req.SetBasicAuth(userinfo.Username(), pwd)
 	}
 	//
 	// Execute the HTTP request
@@ -160,10 +174,6 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 			log.Println("Empty response body")
 		}
 
-	}
-	if mergedOpts.ExpectedStatus != 0 && r.status != mergedOpts.ExpectedStatus {
-		log.Printf("Expected status %v but got %v", mergedOpts.ExpectedStatus, r.status)
-		return response, UnexpectedStatus
 	}
 	return
 }

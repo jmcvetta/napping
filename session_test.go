@@ -131,7 +131,6 @@ func TestRequest(t *testing.T) {
 	for _, test := range reqTests {
 		baseReq := Request{
 			Method: test.method,
-			Opts:   &Opts{},
 		}
 		allReq := baseReq // allRR has all supported attribues for this verb
 		var allHF hfunc   // allHF is combination of all relevant handlers
@@ -159,8 +158,8 @@ func TestRequest(t *testing.T) {
 		h := http.Header{}
 		h.Add(key, value)
 		r = baseReq
-		r.Opts.Header = &h
-		allReq.Opts.Header = &h
+		r.Header = &h
+		allReq.Header = &h
 		f = headerHandler(t, h, nil)
 		allHF = headerHandler(t, h, allHF)
 		pairs = append(pairs, pair{r, f})
@@ -213,16 +212,16 @@ func TestBasicAuth(t *testing.T) {
 	s := Session{}
 	s.UnsafeBasicAuth = true // Otherwise we will get error with httptest
 	r := Request{
-		Url:    "http://" + srv.Listener.Addr().String(),
-		Method: "GET",
-		Opts: &Opts{
-			Userinfo:       url.UserPassword("jtkirk", "Beam me up, Scotty!"),
-			ExpectedStatus: 200,
-		},
+		Url:      "http://" + srv.Listener.Addr().String(),
+		Method:   "GET",
+		Userinfo: url.UserPassword("jtkirk", "Beam me up, Scotty!"),
 	}
-	_, err := s.Send(&r)
+	resp, err := s.Send(&r)
 	if err != nil {
 		t.Fatal(err)
+	}
+	if resp.Status() != 200 {
+		t.Fatalf("Expected status 200 but got %v\n", resp.Status())
 	}
 }
 
@@ -230,11 +229,9 @@ func TestUnsafeBasicAuth(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(HandlePost))
 	defer srv.Close()
 	r := Request{
-		Url:    "http://" + srv.Listener.Addr().String(),
-		Method: "GET",
-		Opts: &Opts{
-			Userinfo: url.UserPassword("a", "b"),
-		},
+		Url:      "http://" + srv.Listener.Addr().String(),
+		Method:   "GET",
+		Userinfo: url.UserPassword("a", "b"),
 	}
 	_, err := Send(&r)
 	assert.NotEqual(t, nil, err)

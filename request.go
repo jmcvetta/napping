@@ -8,15 +8,18 @@ package napping
 import (
 	"encoding/json"
 	"net/http"
+	"net/url"
 	"time"
 )
+
+// A Params is a map containing URL parameters.
+type Params map[string]string
 
 // A Request describes an HTTP request to be executed, data structures into
 // which the result will be unmarshalled, and the server's response. By using
 // a  single object for both the request and the response we allow easy access
 // to Result and Error objects without needing type assertions.
 type Request struct {
-	Opts    *Opts
 	Url     string      // Raw URL string
 	Method  string      // HTTP method to use
 	Params  *Params     // URL parameters for GET requests (ignored otherwise)
@@ -25,6 +28,10 @@ type Request struct {
 	// Result is a pointer to a data structure.  On success, response from
 	// server is unmarshalled into Result.
 	Result interface{}
+
+	// Optional
+	Userinfo *url.Userinfo
+	Header   *http.Header
 
 	// The following fields are populated by Send().
 	timestamp time.Time      // Time when HTTP request was sent
