@@ -3,7 +3,7 @@
 // details.  Resist intellectual serfdom - the ownership of ideas is akin to
 // slavery.
 
-// Example demonstrating use of package restclient, with HTTP Basic
+// Example demonstrating use of package napping, with HTTP Basic
 // authentictation over HTTPS, to retrieve a Github auth token.
 package main
 
@@ -16,7 +16,7 @@ NOTE: This example may only work on *nix systems due to gopass requirements.
 import (
 	"code.google.com/p/gopass"
 	"fmt"
-	"github.com/jmcvetta/restclient"
+	"github.com/jmcvetta/napping"
 	"log"
 	"net/url"
 )
@@ -44,12 +44,12 @@ func main() {
 	//
 	// http://developer.github.com/v3/oauth/#create-a-new-authorization
 	//
-	d := struct {
+	payload := struct {
 		Scopes []string `json:"scopes"`
 		Note   string   `json:"note"`
 	}{
 		Scopes: []string{"public_repo"},
-		Note:   "testing Go restclient",
+		Note:   "testing Go napping",
 	}
 	//
 	// Struct to hold response data
@@ -72,21 +72,17 @@ func main() {
 		Message string
 	}{}
 	//
-	// Setup HTTP Basic auth (ONLY use this with SSL)
+	// Setup HTTP Basic auth for this session (ONLY use this with SSL).  Auth
+	// can also be configured on a per-request basis when using Send().
 	//
-	u := url.UserPassword(username, passwd)
-	rr := restclient.RequestResponse{
-		Url:      "https://api.github.com/authorizations",
-		Userinfo: u,
-		Method:   "POST",
-		Data:     &d,
-		Result:   &res,
-		Error:    &e,
+	s := napping.Session{
+		Userinfo: url.UserPassword(username, passwd),
 	}
+	url := "https://api.github.com/authorizations"
 	//
 	// Send request to server
 	//
-	status, err := restclient.Do(&rr)
+	resp, err := s.Post(url, &payload, &res)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -94,11 +90,11 @@ func main() {
 	// Process response
 	//
 	println("")
-	if status == 201 {
+	if resp.Status() == 201 {
 		fmt.Printf("Github auth token: %s\n\n", res.Token)
 	} else {
 		fmt.Println("Bad response status from Github server")
-		fmt.Printf("\t Status:  %v\n", status)
+		fmt.Printf("\t Status:  %v\n", resp.Status())
 		fmt.Printf("\t Message: %v\n", e.Message)
 	}
 	println("")
