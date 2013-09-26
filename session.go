@@ -131,13 +131,16 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 	defer resp.Body.Close()
 	r.status = resp.StatusCode
 	r.response = resp
+	//
+	// Unmarshal
+	//
 	r.body, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Println(err)
 		return
 	}
-	if string(r.body) != "" {
-		err = json.Unmarshal(r.body, &r.Result)
+	if resp.StatusCode < 300 && r.Result != nil && string(r.body) != "" {
+		err = json.Unmarshal(r.body, r.Result)
 	}
 	rsp := Response(*r)
 	response = &rsp
