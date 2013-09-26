@@ -14,22 +14,19 @@ Example:
 	type Spam struct {
 		Eggs int
 	}
-	f := Foo{
+	payload := Foo{
 		Bar: "baz",
 	}
-	s := Spam{}
-	r := napping.RequestResponse{
-		Url:    "http://foo.com/bar",
-		Method: napping.POST,
-		Data:   &f,
-		Result: &s,
-	}
-	status, err := napping.Do(&r)
+	result := Spam{}
+	url := "http://foo.com/bar"
+	resp, err := napping.Post(uri, &payload, &result)
 	if err != nil {
 		panic(err)
 	}
-	if status == 200 {
-		println(s.Eggs)
+	if resp.Status() == 200 {
+		println(result.Eggs)
 	}
+
+See the "examples" folder for a more complete example.
 */
 package napping
