@@ -93,7 +93,7 @@ func TestGet(t *testing.T) {
 		Message: "Bad query params: bad=value",
 		Status:  500,
 	}
-	resp.Unmarshall(&e)
+	resp.Unmarshal(&e)
 	assert.Equal(t, e, expected)
 }
 

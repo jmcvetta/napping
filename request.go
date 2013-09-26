@@ -59,6 +59,6 @@ func (r *Response) HttpResponse() *http.Response {
 
 // Unmarshal parses the JSON-encoded data in the server's response, and stores
 // the result in the value pointed to by v.
-func (r *Response) Unmarshall(v interface{}) error {
+func (r *Response) Unmarshal(v interface{}) error {
 	return json.Unmarshal(r.body, v)
 }
