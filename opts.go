@@ -27,9 +27,9 @@ type Opts struct {
 	ExpectedStatus int
 }
 
-// update merges this Opts instance with another instance, preferring the other
+// merge merges this Opts instance with another instance, preferring the other
 // instance where there is disagreement.
-func (this *Opts) update(other *Opts) *Opts {
+func (this *Opts) merge(other *Opts) *Opts {
 	merged := this
 	if other == nil {
 		return merged

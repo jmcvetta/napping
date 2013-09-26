@@ -86,7 +86,7 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 	if sessOpts == nil {
 		sessOpts = &Opts{}
 	}
-	mergedOpts := sessOpts.update(r.Opts)
+	mergedOpts := sessOpts.merge(r.Opts)
 	if mergedOpts.Header != nil {
 		for key, values := range *mergedOpts.Header {
 			if len(values) > 0 {
