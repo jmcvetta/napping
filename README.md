@@ -14,14 +14,14 @@ library.
 All API changes will be made via Pull Request, so it's recommended you Watch
 the repo Issues if using `napping` in production.
 
-Used by, and developed in conjunction with, package [neoism][].
+Used by, and developed in conjunction with, [Neoism][].
 
 
 ## Documentation
 
 See GoDoc for [automatically generated API documentation][godoc].
 
-Check out [examples/github_auth_token.go][auth-token] for a working example
+Check out [github_auth_token][auth-token] for a working example
 showing how to retrieve an auth token from the Github API.
 
 
@@ -34,6 +34,6 @@ This is Free Software, released under the terms of the [GPL v3][].
 [RESTful APIs]: http://en.wikipedia.org/wiki/Representational_state_transfer#RESTful_web_APIs
 [Requests]:     http://python-requests.org
 [GPL v3]:       http://www.gnu.org/copyleft/gpl.html
-[auth-token]:   https://github.com/jmcvetta/napping/blob/master/examples/github_auth_token.go
+[auth-token]:   https://github.com/jmcvetta/napping/blob/master/examples/github_auth_token/github_auth_token.go
 [godoc]:        http://godoc.org/github.com/jmcvetta/napping
-[neoism]:       https://github.com/jmcvetta/neoism
+[Neoism]:       https://github.com/jmcvetta/neoism
