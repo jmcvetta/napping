@@ -12,49 +12,49 @@ This module implements the Napping API.
 import ()
 
 // Send composes and sends and HTTP request.
-func Send(r *Request) (response *Response, err error) {
+func Send(r *Request) (*Response, error) {
 	s := Session{}
 	return s.Send(r)
 }
 
 // Get sends a GET request.
-func Get(url string, p *Params, result interface{}) (response *Response, err error) {
+func Get(url string, p *Params, result, errMsg interface{}) (*Response, error) {
 	s := Session{}
-	return s.Get(url, p, result)
+	return s.Get(url, p, result, errMsg)
 }
 
 // Options sends an OPTIONS request.
-func Options(url string, result interface{}) (response *Response, err error) {
+func Options(url string, result, errMsg interface{}) (*Response, error) {
 	s := Session{}
-	return s.Options(url, result)
+	return s.Options(url, result, errMsg)
 }
 
 // Head sends a HEAD request.
-func Head(url string, result interface{}) (response *Response, err error) {
+func Head(url string, result, errMsg interface{}) (*Response, error) {
 	s := Session{}
-	return s.Head(url, result)
+	return s.Head(url, result, errMsg)
 }
 
 // Post sends a POST request.
-func Post(url string, payload, result interface{}) (response *Response, err error) {
+func Post(url string, payload, result, errMsg interface{}) (*Response, error) {
 	s := Session{}
-	return s.Post(url, payload, result)
+	return s.Post(url, payload, result, errMsg)
 }
 
 // Put sends a PUT request.
-func Put(url string, payload, result interface{}) (response *Response, err error) {
+func Put(url string, payload, result, errMsg interface{}) (*Response, error) {
 	s := Session{}
-	return s.Put(url, payload, result)
+	return s.Put(url, payload, result, errMsg)
 }
 
 // Patch sends a PATCH request.
-func Patch(url string, payload, result interface{}) (response *Response, err error) {
+func Patch(url string, payload, result, errMsg interface{}) (*Response, error) {
 	s := Session{}
-	return s.Patch(url, payload, result)
+	return s.Patch(url, payload, result, errMsg)
 }
 
 // Delete sends a DELETE request.
-func Delete(url string) (response *Response, err error) {
+func Delete(url string, result, errMsg interface{}) (*Response, error) {
 	s := Session{}
-	return s.Delete(url)
+	return s.Delete(url, result, errMsg)
 }
