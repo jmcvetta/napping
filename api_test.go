@@ -27,13 +27,13 @@ func TestInvalidUrl(t *testing.T) {
 	//
 
 	url := "://foobar.com"
-	_, err := Get(url, nil, nil)
+	_, err := Get(url, nil, nil, nil)
 	assert.NotEqual(t, nil, err)
 	//
 	// Unsupported protocol scheme - HttpClient.Do should fail
 	//
 	url = "foo://bar.com"
-	_, err = Get(url, nil, nil)
+	_, err = Get(url, nil, nil, nil)
 	assert.NotEqual(t, nil, err)
 }
 
@@ -69,7 +69,7 @@ func TestGet(t *testing.T) {
 	url := "http://" + srv.Listener.Addr().String()
 	p := fooParams
 	res := structType{}
-	resp, err := Get(url, &p, &res)
+	resp, err := Get(url, &p, &res, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -81,7 +81,7 @@ func TestGet(t *testing.T) {
 	url = "http://" + srv.Listener.Addr().String()
 	p = Params{"bad": "value"}
 	e := errorStruct{}
-	resp, err = Get(url, &p, nil)
+	resp, err = Get(url, &p, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -101,7 +101,7 @@ func TestDelete(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(HandleDelete))
 	defer srv.Close()
 	url := "http://" + srv.Listener.Addr().String()
-	resp, err := Delete(url)
+	resp, err := Delete(url, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -113,7 +113,7 @@ func TestHead(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(HandleHead))
 	defer srv.Close()
 	url := "http://" + srv.Listener.Addr().String()
-	resp, err := Head(url, nil)
+	resp, err := Head(url, nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -125,7 +125,7 @@ func TestOptions(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(HandleOptions))
 	defer srv.Close()
 	url := "http://" + srv.Listener.Addr().String()
-	resp, err := Options(url, nil)
+	resp, err := Options(url, nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -140,7 +140,7 @@ func TestPost(t *testing.T) {
 	url := "http://" + srv.Listener.Addr().String()
 	payload := fooStruct
 	res := structType{}
-	resp, err := s.Post(url, &payload, &res)
+	resp, err := s.Post(url, &payload, &res, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -156,7 +156,7 @@ func TestPostUnmarshallable(t *testing.T) {
 	url := "http://" + srv.Listener.Addr().String()
 	res := structType{}
 	payload := f
-	_, err := Post(url, &payload, &res)
+	_, err := Post(url, &payload, &res, nil)
 	assert.NotEqual(t, nil, err)
 	_, ok := err.(*json.UnsupportedTypeError)
 	if !ok {
@@ -170,7 +170,7 @@ func TestPut(t *testing.T) {
 	defer srv.Close()
 	url := "http://" + srv.Listener.Addr().String()
 	res := structType{}
-	resp, err := Put(url, &fooStruct, &res)
+	resp, err := Put(url, &fooStruct, &res, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -184,7 +184,7 @@ func TestPatch(t *testing.T) {
 	defer srv.Close()
 	url := "http://" + srv.Listener.Addr().String()
 	res := structType{}
-	resp, err := Patch(url, &fooStruct, &res)
+	resp, err := Patch(url, &fooStruct, &res, nil)
 	if err != nil {
 		t.Error(err)
 	}
