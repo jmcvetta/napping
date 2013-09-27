@@ -82,7 +82,7 @@ func main() {
 	//
 	// Send request to server
 	//
-	resp, err := s.Post(url, &payload, &res)
+	resp, err := s.Post(url, &payload, &res, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
