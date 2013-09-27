@@ -61,11 +61,14 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 	// Create a Request object; if populated, Data field is JSON encoded as
 	// request body
 	//
-	var req *http.Request
 	header := http.Header{}
 	if s.Header != nil {
-		header = *s.Header
+		for k, _ := range *s.Header {
+			v := s.Header.Get(k)
+			header.Set(k, v)
+		}
 	}
+	var req *http.Request
 	if r.Payload != nil {
 		var b []byte
 		b, err = json.Marshal(&r.Payload)
