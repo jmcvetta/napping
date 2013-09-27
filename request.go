@@ -26,9 +26,13 @@ type Request struct {
 	Params  *Params     // URL parameters for GET requests (ignored otherwise)
 	Payload interface{} // Data to JSON-encode and POST
 
-	// Result is a pointer to a data structure.  On success, response from
-	// server is unmarshalled into Result.
+	// Result is a pointer to a data structure.  On success (HTTP status < 300),
+	// response from server is unmarshaled into Result.
 	Result interface{}
+
+	// Error is a pointer to a data structure.  On error (HTTP status >= 300),
+	// response from server is unmarshaled into Error.
+	Error interface{}
 
 	// Optional
 	Userinfo *url.Userinfo
