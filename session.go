@@ -171,6 +171,9 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 		log.Println("RESPONSE")
 		log.Println("--------------------------------------------------------------------------------")
 		log.Println("Status: ", response.status)
+		log.Println("Header:")
+		prettyPrint(response.HttpResponse().Header)
+		log.Println("Body:")
 		if response.body != nil {
 			raw := json.RawMessage{}
 			if json.Unmarshal(response.body, &raw) == nil {
