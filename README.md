@@ -30,6 +30,23 @@ Check out [github_auth_token][auth-token] for a working example
 showing how to retrieve an auth token from the Github API.
 
 
+# Contributing
+
+Contributions, in the form of Pull Requests or Issues, are gladly accepted.
+Before submitting a Pull Request, please ensure your code passes all tests, and
+that your changes do not decrease test coverage.  I.e. if you add new features,
+also add corresponding new tests.
+
+
+# Sponsorship
+
+Currently Napping is maintained as a personal project, with no corporate
+backing.  [The author](mailto:jason.mcvetta@gmail.com) is seeking a company or
+companies interested in providing financial backing to enable its continued
+maintenance & development. 
+
+
+
 ## License
 
 This is Free Software, released under the terms of the [GPL v3][].
