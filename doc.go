@@ -19,7 +19,7 @@ Example:
 	}
 	result := Spam{}
 	url := "http://foo.com/bar"
-	resp, err := napping.Post(uri, &payload, &result)
+	resp, err := napping.Post(url, &payload, &result, nil)
 	if err != nil {
 		panic(err)
 	}
