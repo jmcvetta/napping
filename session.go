@@ -20,6 +20,8 @@ import (
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/jmcvetta/napping/httpclient"
 )
 
 import ()
@@ -30,12 +32,26 @@ type Session struct {
 	Log             bool // Log request and response
 
 	// Optional
-	Userinfo *url.Userinfo
-	Header   *http.Header
+	Userinfo           *url.Userinfo
+	Header             *http.Header
+	HttpConnectTimeout time.Duration
+	HttpReadTimeout    time.Duration
 }
 
 // Send constructs and sends an HTTP request.
 func (s *Session) Send(r *Request) (response *Response, err error) {
+	resp, err := s.SendWithTimeouts(r, s.HttpConnectTimeout, s.HttpReadTimeout)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+// SendWithTimeouts constructs and sends an HTTP request with two timeouts:
+// 1) connectTimeout - times out trying to connect
+// 2) readWriteTimeout - times out reading or writing data
+// If either is set to 0, the http client will not timeout for its given reason.
+func (s *Session) SendWithTimeouts(r *Request, httpConnectTimeout time.Duration, httpReadTimeout time.Duration) (response *Response, err error) {
 	r.Method = strings.ToUpper(r.Method)
 	//
 	// Create a URL object from the raw url string.  This will allow us to compose
@@ -138,7 +154,7 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 	if s.Client != nil {
 		client = s.Client
 	} else {
-		client = &http.Client{}
+		client = httpclient.NewWithTimeout(httpConnectTimeout, httpReadTimeout)
 	}
 	resp, err := client.Do(req)
 	if err != nil {

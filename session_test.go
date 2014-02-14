@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"github.com/bmizerany/assert"
 	"github.com/jmcvetta/randutil"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -18,6 +19,7 @@ import (
 	"regexp"
 	"strings"
 	"testing"
+	"time"
 )
 
 func init() {
@@ -283,4 +285,73 @@ func HandleGetBasicAuth(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	w.WriteHeader(200)
+}
+
+// Timeout Tests
+func FastHandler(w http.ResponseWriter, req *http.Request) {
+	time.Sleep(200 * time.Millisecond)
+	io.WriteString(w, "hello, world!\n")
+}
+
+func SlowHandler(w http.ResponseWriter, req *http.Request) {
+	time.Sleep(800 * time.Millisecond)
+	io.WriteString(w, "hello, world ... in a bit\n")
+}
+
+func TestRequestWithTimeout(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(FastHandler))
+	defer srv.Close()
+	s := Session{}
+	r := &Request{
+		Url:    "http://" + srv.Listener.Addr().String(),
+		Method: "GET",
+	}
+	resp, err := s.SendWithTimeouts(r, 500*time.Millisecond, 500*time.Millisecond)
+	if err != nil {
+		t.Error(err)
+	}
+	if resp.Status() != 200 {
+		t.Error("Expected status 200 but got %v\n", resp.Status())
+	}
+}
+
+func TestRequestWithTimeoutError(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(SlowHandler))
+	defer srv.Close()
+	s := Session{}
+	r := &Request{
+		Url:    "http://" + srv.Listener.Addr().String(),
+		Method: "GET",
+	}
+	_, err := s.SendWithTimeouts(r, 500*time.Millisecond, 500*time.Millisecond)
+	if err == nil {
+		t.Error("Expected a i/o timeout error.")
+	} else {
+
+	}
+}
+
+func TestGetWithTimeout(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(FastHandler))
+	defer srv.Close()
+	s := Session{HttpConnectTimeout: 500 * time.Millisecond, HttpReadTimeout: 500 * time.Millisecond}
+	resp, err := s.Get("http://"+srv.Listener.Addr().String(), nil, nil, nil)
+	if err != nil {
+		t.Error(err)
+	}
+	if resp.Status() != 200 {
+		t.Error("Expected status 200 but got %v\n", resp.Status())
+	}
+}
+
+func TestGetWithTimeoutError(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(SlowHandler))
+	defer srv.Close()
+	s := Session{HttpConnectTimeout: 500 * time.Millisecond, HttpReadTimeout: 500 * time.Millisecond}
+	_, err := s.Get("http://"+srv.Listener.Addr().String(), nil, nil, nil)
+	if err == nil {
+		t.Error("Expected a i/o timeout error.")
+	} else {
+
+	}
 }
