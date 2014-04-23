@@ -29,6 +29,9 @@ See GoDoc for [automatically generated API documentation][godoc].
 Check out [github_auth_token][auth-token] for a working example
 showing how to retrieve an auth token from the Github API.
 
+Check out [docker_unixsocket][unix-socket] to see how to make REST
+requests to Unix domain socket endpoints.
+
 
 # Contributing
 
@@ -48,5 +51,6 @@ This is Free Software, released under the terms of the [GPL v3][].
 [Requests]:     http://python-requests.org
 [GPL v3]:       http://www.gnu.org/copyleft/gpl.html
 [auth-token]:   https://github.com/jmcvetta/napping/blob/master/examples/github_auth_token/github_auth_token.go
+[unix-socket]:  https://github.com/jmcvetta/napping/blob/master/examples/docker_unixsocket/docker_unixsocket.go
 [godoc]:        http://godoc.org/github.com/jmcvetta/napping
 [Neoism]:       https://github.com/jmcvetta/neoism
