@@ -36,6 +36,9 @@ type Session struct {
 
 // Send constructs and sends an HTTP request.
 func (s *Session) Send(r *Request) (response *Response, err error) {
+	var client *http.Client
+	var socketPath string
+	var path string
 	r.Method = strings.ToUpper(r.Method)
 	//
 	// Create a URL object from the raw url string.  This will allow us to compose
@@ -46,6 +49,26 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 		log.Println(err)
 		return
 	}
+	//
+	// If this is a Unix socket, separate the path to the socket from the request path.
+	//
+  if u.Scheme == "unix" {
+    socketPath, path, err = LocateSocket(u.Path)
+    if err != nil {
+      log.Println(err)
+      return
+    }
+    u.Path = path
+  }
+  if s.Client != nil {
+    client = s.Client
+  } else {
+    if u.Scheme == "unix" {
+      client = &http.Client{Transport: SocketTransport{path: socketPath}}
+    } else {
+      client = &http.Client{}
+    }
+  }
 	//
 	// If we are making a GET request and the user populated the Params field, then
 	// add the params to the URL's querystring.
@@ -134,12 +157,7 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 		prettyPrint(r.Payload)
 	}
 	r.timestamp = time.Now()
-	var client *http.Client
-	if s.Client != nil {
-		client = s.Client
-	} else {
-		client = &http.Client{}
-	}
+
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Println(err)
