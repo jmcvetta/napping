@@ -20,6 +20,7 @@ import (
 	"net/url"
 	"strings"
 	"time"
+	"path"
 )
 
 import ()
@@ -38,7 +39,7 @@ type Session struct {
 func (s *Session) Send(r *Request) (response *Response, err error) {
 	var client *http.Client
 	var socketPath string
-	var path string
+	var requestPath string
 	r.Method = strings.ToUpper(r.Method)
 	//
 	// Create a URL object from the raw url string.  This will allow us to compose
@@ -53,12 +54,14 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 	// If this is a Unix socket, separate the path to the socket from the request path.
 	//
   if u.Scheme == "unix" {
-    socketPath, path, err = LocateSocket(u.Path)
+    socketPath, requestPath, err = LocateSocket(path.Join(u.Host, u.Path))
     if err != nil {
       log.Println(err)
       return
     }
-    u.Path = path
+    u.Path = requestPath
+    // NOTE: This seems to be scrubbed by prettyPrint.
+    u.Host = socketPath
   }
   if s.Client != nil {
     client = s.Client

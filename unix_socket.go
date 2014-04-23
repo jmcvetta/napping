@@ -7,7 +7,6 @@ import (
   "errors"
   "path"
   "os"
-  "fmt"
 )
 
 type SocketTransport struct {path string}
@@ -27,7 +26,6 @@ func (d SocketTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 func isUnixSocket(path string) bool {
   fi, err := os.Lstat(path)
   if err != nil {
-    fmt.Println(path + " " + err.Error())
     return false
   }
   return fi.Mode()&os.ModeType == os.ModeSocket
