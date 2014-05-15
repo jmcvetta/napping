@@ -60,8 +60,7 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
       return
     }
     u.Path = requestPath
-    // NOTE: This seems to be scrubbed by prettyPrint.
-    u.Host = socketPath
+    u.Host = ""
   }
   if s.Client != nil {
     client = s.Client
