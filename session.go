@@ -47,10 +47,10 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 		return
 	}
 	//
-	// If we are making a GET request and the user populated the Params field, then
-	// add the params to the URL's querystring.
+	// If the user populated the Params field, then add the params to the URL's
+	// querystring.
 	//
-	if r.Method == "GET" && r.Params != nil {
+	if r.Params != nil {
 		vals := u.Query()
 		for k, v := range *r.Params {
 			vals.Set(k, v)

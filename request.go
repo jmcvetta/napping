@@ -23,7 +23,7 @@ type Params map[string]string
 type Request struct {
 	Url     string      // Raw URL string
 	Method  string      // HTTP method to use
-	Params  *Params     // URL parameters for GET requests (ignored otherwise)
+	Params  *Params     // URL query parameters
 	Payload interface{} // Data to JSON-encode and POST
 
 	// Result is a pointer to a data structure.  On success (HTTP status < 300),
