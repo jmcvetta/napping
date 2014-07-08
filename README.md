@@ -16,9 +16,6 @@ library.
 [![library users](https://sourcegraph.com/api/repos/github.com/jmcvetta/napping/badges/library-users.png)](https://sourcegraph.com/github.com/jmcvetta/napping)
 [![status](https://sourcegraph.com/api/repos/github.com/jmcvetta/napping/badges/status.png)](https://sourcegraph.com/github.com/jmcvetta/napping)
 
-All API changes will be made via Pull Request, so it's recommended you Watch
-the repo Issues if using `napping` in production.
-
 Used by, and developed in conjunction with, [Neoism][].
 
 
@@ -36,6 +33,14 @@ Contributions, in the form of Pull Requests or Issues, are gladly accepted.
 Before submitting a Pull Request, please ensure your code passes all tests, and
 that your changes do not decrease test coverage.  I.e. if you add new features,
 also add corresponding new tests.
+
+
+## Production Note
+
+If you decide to use Napping in a production system, please let me know.  All
+API changes will be made via Pull Request, so it's highly recommended you Watch
+the repo Issues.  The API is fairly stable, but there may be additions and 
+small changes from time to time.
 
 
 ## License
