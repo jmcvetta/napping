@@ -19,6 +19,8 @@ import (
 	"github.com/jmcvetta/napping"
 	"log"
 	"net/url"
+	"github.com/kr/pretty"
+	"time"
 )
 
 func init() {
@@ -49,7 +51,7 @@ func main() {
 		Note   string   `json:"note"`
 	}{
 		Scopes: []string{"public_repo"},
-		Note:   "testing Go napping",
+		Note:   "testing Go napping" + time.Now().String(),
 	}
 	//
 	// Struct to hold response data
@@ -70,6 +72,11 @@ func main() {
 	//
 	e := struct {
 		Message string
+		Errors []struct{
+			Resource string
+			Field string
+			Code string
+		}
 	}{}
 	//
 	// Setup HTTP Basic auth for this session (ONLY use this with SSL).  Auth
@@ -82,7 +89,7 @@ func main() {
 	//
 	// Send request to server
 	//
-	resp, err := s.Post(url, &payload, &res, nil)
+	resp, err := s.Post(url, &payload, &res, &e)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -96,6 +103,8 @@ func main() {
 		fmt.Println("Bad response status from Github server")
 		fmt.Printf("\t Status:  %v\n", resp.Status())
 		fmt.Printf("\t Message: %v\n", e.Message)
+		fmt.Printf("\t Errors: %v\n", e.Message)
+		pretty.Println(e.Errors)
 	}
 	println("")
 }
