@@ -17,9 +17,9 @@ import (
 	"code.google.com/p/gopass"
 	"fmt"
 	"github.com/jmcvetta/napping"
+	"github.com/kr/pretty"
 	"log"
 	"net/url"
-	"github.com/kr/pretty"
 	"time"
 )
 
@@ -72,10 +72,10 @@ func main() {
 	//
 	e := struct {
 		Message string
-		Errors []struct{
+		Errors  []struct {
 			Resource string
-			Field string
-			Code string
+			Field    string
+			Code     string
 		}
 	}{}
 	//

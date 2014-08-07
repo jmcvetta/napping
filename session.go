@@ -31,7 +31,10 @@ type Session struct {
 
 	// Optional
 	Userinfo *url.Userinfo
-	Header   *http.Header
+
+	// Optional defaults - can be overridden in a Request
+	Header *http.Header
+	Params *Params
 }
 
 // Send constructs and sends an HTTP request.
@@ -43,20 +46,35 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 	//
 	u, err := url.Parse(r.Url)
 	if err != nil {
+		log.Println("URL", r.Url)
 		log.Println(err)
 		return
 	}
 	//
-	// If the user populated the Params field, then add the params to the URL's
-	// querystring.
+	// Default query parameters
+	//
+	var p Params
+	if s.Params != nil {
+		p = *s.Params
+	} else {
+		p = Params{}
+	}
+	//
+	// User-supplied params override default
 	//
 	if r.Params != nil {
-		vals := u.Query()
 		for k, v := range *r.Params {
-			vals.Set(k, v)
+			p[k] = v
 		}
-		u.RawQuery = vals.Encode()
 	}
+	//
+	// Encode parameters
+	//
+	vals := u.Query()
+	for k, v := range p {
+		vals.Set(k, v)
+	}
+	u.RawQuery = vals.Encode()
 	//
 	// Create a Request object; if populated, Data field is JSON encoded as
 	// request body
