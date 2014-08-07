@@ -21,7 +21,8 @@ Used by, and developed in conjunction with, [Neoism][].
 
 ## Documentation
 
-[![GoDoc](https://godoc.org/github.com/jmcvetta/napping?status.png)](https://godoc.org/github.com/jmcvetta/napping)
+See [![GoDoc](https://godoc.org/github.com/jmcvetta/napping?status.png)](https://godoc.org/github.com/jmcvetta/napping)
+for automatically generated API documentation.
 
 Check out [github_auth_token][auth-token] for a working example
 showing how to retrieve an auth token from the Github API.
