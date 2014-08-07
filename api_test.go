@@ -97,6 +97,47 @@ func TestGet(t *testing.T) {
 	assert.Equal(t, e, expected)
 }
 
+// TestDefaultParams tests using per-session default query parameters.
+func TestDefaultParams(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(HandleGet))
+	defer srv.Close()
+	//
+	// Good request
+	//
+	url := "http://" + srv.Listener.Addr().String()
+	p := fooParams
+	res := structType{}
+	s := Session{
+		Params: &p,
+	}
+	resp, err := s.Get(url, nil, &res, nil)
+	if err != nil {
+		t.Error(err)
+	}
+	assert.Equal(t, 200, resp.Status())
+	assert.Equal(t, res, barStruct)
+	//
+	// Bad request
+	//
+	url = "http://" + srv.Listener.Addr().String()
+	p = Params{"bad": "value"}
+	e := errorStruct{}
+	resp, err = Get(url, &p, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resp.Status() == 200 {
+		t.Error("Server returned 200 success when it should have failed")
+	}
+	assert.Equal(t, 500, resp.Status())
+	expected := errorStruct{
+		Message: "Bad query params: bad=value",
+		Status:  500,
+	}
+	resp.Unmarshal(&e)
+	assert.Equal(t, e, expected)
+}
+
 func TestDelete(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(HandleDelete))
 	defer srv.Close()
