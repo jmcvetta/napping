@@ -21,7 +21,7 @@ Used by, and developed in conjunction with, [Neoism][].
 
 ## Documentation
 
-See GoDoc for [automatically generated API documentation][godoc].
+[![GoDoc](https://godoc.org/github.com/jmcvetta/napping?status.png)](https://godoc.org/github.com/jmcvetta/napping)
 
 Check out [github_auth_token][auth-token] for a working example
 showing how to retrieve an auth token from the Github API.
@@ -53,5 +53,4 @@ This is Free Software, released under the terms of the [GPL v3][].
 [Requests]:     http://python-requests.org
 [GPL v3]:       http://www.gnu.org/copyleft/gpl.html
 [auth-token]:   https://github.com/jmcvetta/napping/blob/master/examples/github_auth_token/github_auth_token.go
-[godoc]:        http://godoc.org/github.com/jmcvetta/napping
 [Neoism]:       https://github.com/jmcvetta/neoism
