@@ -53,11 +53,11 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 	//
 	// Default query parameters
 	//
-	var p Params
+	p := Params{}
 	if s.Params != nil {
-		p = *s.Params
-	} else {
-		p = Params{}
+		for k, v := range *s.Params {
+			p[k] = v
+		}
 	}
 	//
 	// User-supplied params override default
