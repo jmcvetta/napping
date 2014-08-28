@@ -43,6 +43,9 @@ Before submitting a Pull Request, please ensure your code passes all tests, and
 that your changes do not decrease test coverage.  I.e. if you add new features,
 also add corresponding new tests.
 
+When submitting an Issue, if possible please include a failing test case that 
+demonstrates the problem.
+
 
 ## License
 
