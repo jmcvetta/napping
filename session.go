@@ -13,7 +13,6 @@ requests (cookies, auth, proxies).
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -25,9 +24,8 @@ import (
 import ()
 
 type Session struct {
-	Client          *http.Client
-	UnsafeBasicAuth bool // Allow Basic Auth over unencrypted HTTP
-	Log             bool // Log request and response
+	Client *http.Client
+	Log    bool // Log request and response
 
 	// Optional
 	Userinfo *url.Userinfo
@@ -113,6 +111,9 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 	// Merge Session and Request options
 	//
 	var userinfo *url.Userinfo
+	if u.User != nil {
+		userinfo = u.User
+	}
 	if s.Userinfo != nil {
 		userinfo = s.Userinfo
 	}
@@ -133,12 +134,10 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 	// Set HTTP Basic authentication if userinfo is supplied
 	//
 	if userinfo != nil {
-		if !s.UnsafeBasicAuth && u.Scheme != "https" {
-			err = errors.New("Unsafe to use HTTP Basic authentication without HTTPS")
-			return
+		if u.Scheme == "https" {
+			pwd, _ := userinfo.Password()
+			req.SetBasicAuth(userinfo.Username(), pwd)
 		}
-		pwd, _ := userinfo.Password()
-		req.SetBasicAuth(userinfo.Username(), pwd)
 	}
 	//
 	// Execute the HTTP request
