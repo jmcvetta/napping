@@ -134,10 +134,8 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 	// Set HTTP Basic authentication if userinfo is supplied
 	//
 	if userinfo != nil {
-		if u.Scheme == "https" {
-			pwd, _ := userinfo.Password()
-			req.SetBasicAuth(userinfo.Username(), pwd)
-		}
+		pwd, _ := userinfo.Password()
+		req.SetBasicAuth(userinfo.Username(), pwd)
 	}
 	//
 	// Execute the HTTP request
