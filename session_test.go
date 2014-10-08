@@ -230,8 +230,8 @@ func TestBasicUrlAuth(t *testing.T) {
 	testUrl, _ := url.Parse("http://" + srv.Listener.Addr().String())
 	testUrl.User = url.UserPassword("jtkirk", "Beam me up, Scotty!")
 	r := Request{
-		Url:      testUrl.String(),
-		Method:   "GET",
+		Url:    testUrl.String(),
+		Method: "GET",
 	}
 	resp, err := s.Send(&r)
 	if err != nil {
