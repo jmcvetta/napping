@@ -21,7 +21,7 @@ Used by, and developed in conjunction with, [Neoism][].
 
 ## Documentation
 
-See [![GoDoc](https://godoc.org/github.com/jmcvetta/napping?status.png)](https://godoc.org/github.com/jmcvetta/napping)
+See [![GoDoc](http://godoc.org/github.com/jmcvetta/napping?status.png)](http://godoc.org/github.com/jmcvetta/napping)
 for automatically generated API documentation.
 
 Check out [github_auth_token][auth-token] for a working example
