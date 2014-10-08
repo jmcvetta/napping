@@ -8,7 +8,6 @@ package napping
 import (
 	"encoding/base64"
 	"encoding/json"
-	"github.com/bmizerany/assert"
 	"github.com/jmcvetta/randutil"
 	"io/ioutil"
 	"log"
@@ -210,7 +209,6 @@ func TestBasicAuth(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(HandleGetBasicAuth))
 	defer srv.Close()
 	s := Session{}
-	s.UnsafeBasicAuth = true // Otherwise we will get error with httptest
 	r := Request{
 		Url:      "http://" + srv.Listener.Addr().String(),
 		Method:   "GET",
@@ -225,16 +223,23 @@ func TestBasicAuth(t *testing.T) {
 	}
 }
 
-func TestUnsafeBasicAuth(t *testing.T) {
-	srv := httptest.NewServer(http.HandlerFunc(HandlePost))
+func TestBasicUrlAuth(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(HandleGetBasicAuth))
 	defer srv.Close()
+	s := Session{}
+	testUrl, _ := url.Parse("http://" + srv.Listener.Addr().String())
+	testUrl.User = url.UserPassword("jtkirk", "Beam me up, Scotty!")
 	r := Request{
-		Url:      "http://" + srv.Listener.Addr().String(),
+		Url:      testUrl.String(),
 		Method:   "GET",
-		Userinfo: url.UserPassword("a", "b"),
 	}
-	_, err := Send(&r)
-	assert.NotEqual(t, nil, err)
+	resp, err := s.Send(&r)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resp.Status() != 200 {
+		t.Fatalf("Expected status 200 but got %v\n", resp.Status())
+	}
 }
 
 //
