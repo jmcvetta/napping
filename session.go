@@ -137,7 +137,7 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 		pwd, _ := userinfo.Password()
 		req.SetBasicAuth(userinfo.Username(), pwd)
 		if u.Scheme != "https" {
-			log.Println("Warning: using HTTP Basic Auth in cleartext is unsecure.")
+			log.Println("WARNING: Using HTTP Basic Auth in cleartext is insecure.")
 		}
 	}
 	//
