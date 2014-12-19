@@ -23,7 +23,7 @@ Used by, and developed in conjunction with, [Neoism][].
 
 ### Development
 
-```bash
+```
 go get github.com/jmcvetta/napping
 ```
 
@@ -33,7 +33,7 @@ Napping is versioned using [`gopkg.in`](http://gopkg.in).
 
 Current release is `v1`.
 
-```bash
+```
 go get gopkg.in/jmcvetta/napping.v1
 ```
 
