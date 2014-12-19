@@ -21,6 +21,11 @@ Used by, and developed in conjunction with, [Neoism][].
 
 ## Installation 
 
+### Requirements
+
+Napping requires Go 1.2 or later.
+
+
 ### Development
 
 ```
