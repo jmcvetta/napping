@@ -19,6 +19,25 @@ library.
 Used by, and developed in conjunction with, [Neoism][].
 
 
+## Installation 
+
+### Development
+
+```bash
+go get github.com/jmcvetta/napping
+```
+
+### Stable
+
+Napping is versioned using [`gopkg.in`](http://gopkg.in).  
+
+Current release is `v1`.
+
+```bash
+go get gopkg.in/jmcvetta/napping.v1
+```
+
+
 ## Documentation
 
 See [![GoDoc](http://godoc.org/github.com/jmcvetta/napping?status.png)](http://godoc.org/github.com/jmcvetta/napping)
