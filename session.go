@@ -147,9 +147,9 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 		log.Println("--------------------------------------------------------------------------------")
 		log.Println("REQUEST")
 		log.Println("--------------------------------------------------------------------------------")
-		prettyPrint(req)
+		log.Println(pretty(req))
 		log.Print("Payload: ")
-		prettyPrint(r.Payload)
+		log.Println(pretty(r.Payload))
 	}
 	r.timestamp = time.Now()
 	var client *http.Client
@@ -190,14 +190,14 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 		log.Println("--------------------------------------------------------------------------------")
 		log.Println("Status: ", response.status)
 		log.Println("Header:")
-		prettyPrint(response.HttpResponse().Header)
+		log.Println(pretty(response.HttpResponse().Header))
 		log.Println("Body:")
 		if response.body != nil {
 			raw := json.RawMessage{}
 			if json.Unmarshal(response.body, &raw) == nil {
-				prettyPrint(&raw)
+				log.Println(pretty(&raw))
 			} else {
-				prettyPrint(response.RawText())
+				log.Println(pretty(response.RawText()))
 			}
 		} else {
 			log.Println("Empty response body")
