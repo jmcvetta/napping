@@ -7,17 +7,21 @@ package napping
 
 import (
 	"encoding/json"
-	"os"
+	"fmt"
 	"path/filepath"
 	"runtime"
-	"strconv"
 )
 
-func prettyPrint(v interface{}) {
+func pretty(v interface{}) string {
+	// Get source file and line
 	_, file, line, _ := runtime.Caller(1)
-	lineNo := strconv.Itoa(line)
-	file = filepath.Base(file)
+
+	// Get relative filename
+	filename := filepath.Base(file)
+
+	// Convert to JSON
 	b, _ := json.MarshalIndent(v, "", "\t")
-	s := file + ":" + lineNo + ": \n" + string(b) + "\n"
-	os.Stderr.WriteString(s)
+
+	// Make that all pretty together
+	return fmt.Sprintf("%s:%d: \n%s\n", filename, line, string(b))
 }

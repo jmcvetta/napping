@@ -44,8 +44,8 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 	//
 	u, err := url.Parse(r.Url)
 	if err != nil {
-		log.Println("URL", r.Url)
-		log.Println(err)
+		s.log("URL", r.Url)
+		s.log(err)
 		return
 	}
 	//
@@ -89,20 +89,20 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 		var b []byte
 		b, err = json.Marshal(&r.Payload)
 		if err != nil {
-			log.Println(err)
+			s.log(err)
 			return
 		}
 		buf := bytes.NewBuffer(b)
 		req, err = http.NewRequest(r.Method, u.String(), buf)
 		if err != nil {
-			log.Println(err)
+			s.log(err)
 			return
 		}
 		header.Add("Content-Type", "application/json")
 	} else { // no data to encode
 		req, err = http.NewRequest(r.Method, u.String(), nil)
 		if err != nil {
-			log.Println(err)
+			s.log(err)
 			return
 		}
 
@@ -136,21 +136,22 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 	if userinfo != nil {
 		pwd, _ := userinfo.Password()
 		req.SetBasicAuth(userinfo.Username(), pwd)
-		if u.Scheme != "https" && s.Log {
-			log.Println("WARNING: Using HTTP Basic Auth in cleartext is insecure.")
+		if u.Scheme != "https" {
+			s.log("WARNING: Using HTTP Basic Auth in cleartext is insecure.")
 		}
 	}
 	//
 	// Execute the HTTP request
 	//
-	if s.Log {
-		log.Println("--------------------------------------------------------------------------------")
-		log.Println("REQUEST")
-		log.Println("--------------------------------------------------------------------------------")
-		prettyPrint(req)
-		log.Print("Payload: ")
-		prettyPrint(r.Payload)
-	}
+
+	// Debug log request
+	s.log("--------------------------------------------------------------------------------")
+	s.log("REQUEST")
+	s.log("--------------------------------------------------------------------------------")
+	s.log(pretty(req))
+	s.log("Payload:")
+	s.log(pretty(r.Payload))
+
 	r.timestamp = time.Now()
 	var client *http.Client
 	if s.Client != nil {
@@ -160,7 +161,7 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 	}
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Println(err)
+		s.log(err)
 		return
 	}
 	defer resp.Body.Close()
@@ -171,7 +172,7 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 	//
 	r.body, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Println(err)
+		s.log(err)
 		return
 	}
 	if string(r.body) != "" {
@@ -184,26 +185,27 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 	}
 	rsp := Response(*r)
 	response = &rsp
-	if s.Log {
-		log.Println("--------------------------------------------------------------------------------")
-		log.Println("RESPONSE")
-		log.Println("--------------------------------------------------------------------------------")
-		log.Println("Status: ", response.status)
-		log.Println("Header:")
-		prettyPrint(response.HttpResponse().Header)
-		log.Println("Body:")
-		if response.body != nil {
-			raw := json.RawMessage{}
-			if json.Unmarshal(response.body, &raw) == nil {
-				prettyPrint(&raw)
-			} else {
-				prettyPrint(response.RawText())
-			}
-		} else {
-			log.Println("Empty response body")
-		}
 
+	// Debug log response
+	s.log("--------------------------------------------------------------------------------")
+	s.log("RESPONSE")
+	s.log("--------------------------------------------------------------------------------")
+	s.log("Status: ", response.status)
+	s.log("Header:")
+	s.log(pretty(response.HttpResponse().Header))
+	s.log("Body:")
+
+	if response.body != nil {
+		raw := json.RawMessage{}
+		if json.Unmarshal(response.body, &raw) == nil {
+			s.log(pretty(&raw))
+		} else {
+			s.log(pretty(response.RawText()))
+		}
+	} else {
+		s.log("Empty response body")
 	}
+
 	return
 }
 
@@ -286,4 +288,13 @@ func (s *Session) Delete(url string, result, errMsg interface{}) (*Response, err
 		Error:  errMsg,
 	}
 	return s.Send(&r)
+}
+
+// Debug method for logging
+// Centralizing logging in one method
+// avoids spreading conditionals everywhere
+func (s *Session) log(args ...interface{}) {
+	if s.Log {
+		log.Println(args...)
+	}
 }
