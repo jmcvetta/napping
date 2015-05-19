@@ -10,11 +10,6 @@ library.
 [![Drone Build Status](https://drone.io/github.com/jmcvetta/napping/status.png)](https://drone.io/github.com/jmcvetta/napping/latest)
 [![Travis Build Status](https://travis-ci.org/jmcvetta/napping.png)](https://travis-ci.org/jmcvetta/napping)
 [![Coverage Status](https://coveralls.io/repos/jmcvetta/restclient/badge.png)](https://coveralls.io/r/jmcvetta/napping)
-[![xrefs](https://sourcegraph.com/api/repos/github.com/jmcvetta/napping/badges/xrefs.png)](https://sourcegraph.com/github.com/jmcvetta/napping)
-[![funcs](https://sourcegraph.com/api/repos/github.com/jmcvetta/napping/badges/funcs.png)](https://sourcegraph.com/github.com/jmcvetta/napping)
-[![top func](https://sourcegraph.com/api/repos/github.com/jmcvetta/napping/badges/top-func.png)](https://sourcegraph.com/github.com/jmcvetta/napping)
-[![library users](https://sourcegraph.com/api/repos/github.com/jmcvetta/napping/badges/library-users.png)](https://sourcegraph.com/github.com/jmcvetta/napping)
-[![status](https://sourcegraph.com/api/repos/github.com/jmcvetta/napping/badges/status.png)](https://sourcegraph.com/github.com/jmcvetta/napping)
 
 Used by, and developed in conjunction with, [Neoism][].
 
