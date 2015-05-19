@@ -44,8 +44,8 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 	//
 	u, err := url.Parse(r.Url)
 	if err != nil {
-		log.Println("URL", r.Url)
-		log.Println(err)
+		s.log("URL", r.Url)
+		s.log(err)
 		return
 	}
 	//
@@ -89,20 +89,20 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 		var b []byte
 		b, err = json.Marshal(&r.Payload)
 		if err != nil {
-			log.Println(err)
+			s.log(err)
 			return
 		}
 		buf := bytes.NewBuffer(b)
 		req, err = http.NewRequest(r.Method, u.String(), buf)
 		if err != nil {
-			log.Println(err)
+			s.log(err)
 			return
 		}
 		header.Add("Content-Type", "application/json")
 	} else { // no data to encode
 		req, err = http.NewRequest(r.Method, u.String(), nil)
 		if err != nil {
-			log.Println(err)
+			s.log(err)
 			return
 		}
 
@@ -160,7 +160,7 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 	}
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Println(err)
+		s.log(err)
 		return
 	}
 	defer resp.Body.Close()
@@ -171,7 +171,7 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 	//
 	r.body, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Println(err)
+		s.log(err)
 		return
 	}
 	if string(r.body) != "" {
@@ -197,12 +197,12 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 	if response.body != nil {
 		raw := json.RawMessage{}
 		if json.Unmarshal(response.body, &raw) == nil {
-			log.Println(pretty(&raw))
+			s.log(pretty(&raw))
 		} else {
-			log.Println(pretty(response.RawText()))
+			s.log(pretty(response.RawText()))
 		}
 	} else {
-		log.Println("Empty response body")
+		s.log("Empty response body")
 	}
 
 	return
