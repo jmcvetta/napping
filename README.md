@@ -31,7 +31,7 @@ go get github.com/jmcvetta/napping
 
 Napping is versioned using [`gopkg.in`](http://gopkg.in).  
 
-Current release is `v1`.
+Current release is `v1.1`.
 
 ```
 go get gopkg.in/jmcvetta/napping.v1
