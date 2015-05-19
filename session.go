@@ -149,7 +149,8 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 	s.log("REQUEST")
 	s.log("--------------------------------------------------------------------------------")
 	s.log(pretty(req))
-	s.log("Payload:", pretty(r.Payload))
+	s.log("Payload:")
+	s.log(pretty(r.Payload))
 
 	r.timestamp = time.Now()
 	var client *http.Client
