@@ -136,21 +136,21 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 	if userinfo != nil {
 		pwd, _ := userinfo.Password()
 		req.SetBasicAuth(userinfo.Username(), pwd)
-		if u.Scheme != "https" && s.Log {
-			log.Println("WARNING: Using HTTP Basic Auth in cleartext is insecure.")
+		if u.Scheme != "https" {
+			s.log("WARNING: Using HTTP Basic Auth in cleartext is insecure.")
 		}
 	}
 	//
 	// Execute the HTTP request
 	//
-	if s.Log {
-		log.Println("--------------------------------------------------------------------------------")
-		log.Println("REQUEST")
-		log.Println("--------------------------------------------------------------------------------")
-		log.Println(pretty(req))
-		log.Print("Payload: ")
-		log.Println(pretty(r.Payload))
-	}
+
+	// Debug log request
+	s.log("--------------------------------------------------------------------------------")
+	s.log("REQUEST")
+	s.log("--------------------------------------------------------------------------------")
+	s.log(pretty(req))
+	s.log("Payload:", pretty(r.Payload))
+
 	r.timestamp = time.Now()
 	var client *http.Client
 	if s.Client != nil {
@@ -184,26 +184,27 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 	}
 	rsp := Response(*r)
 	response = &rsp
-	if s.Log {
-		log.Println("--------------------------------------------------------------------------------")
-		log.Println("RESPONSE")
-		log.Println("--------------------------------------------------------------------------------")
-		log.Println("Status: ", response.status)
-		log.Println("Header:")
-		log.Println(pretty(response.HttpResponse().Header))
-		log.Println("Body:")
-		if response.body != nil {
-			raw := json.RawMessage{}
-			if json.Unmarshal(response.body, &raw) == nil {
-				log.Println(pretty(&raw))
-			} else {
-				log.Println(pretty(response.RawText()))
-			}
-		} else {
-			log.Println("Empty response body")
-		}
 
+	// Debug log response
+	s.log("--------------------------------------------------------------------------------")
+	s.log("RESPONSE")
+	s.log("--------------------------------------------------------------------------------")
+	s.log("Status: ", response.status)
+	s.log("Header:")
+	s.log(pretty(response.HttpResponse().Header))
+	s.log("Body:")
+
+	if response.body != nil {
+		raw := json.RawMessage{}
+		if json.Unmarshal(response.body, &raw) == nil {
+			log.Println(pretty(&raw))
+		} else {
+			log.Println(pretty(response.RawText()))
+		}
+	} else {
+		log.Println("Empty response body")
 	}
+
 	return
 }
 
@@ -286,4 +287,13 @@ func (s *Session) Delete(url string, result, errMsg interface{}) (*Response, err
 		Error:  errMsg,
 	}
 	return s.Send(&r)
+}
+
+// Debug method for logging
+// Centralizing logging in one method
+// avoids spreading conditionals everywhere
+func (s *Session) log(args ...interface{}) {
+	if s.Log {
+		log.Println(args...)
+	}
 }
