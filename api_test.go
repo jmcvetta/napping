@@ -15,6 +15,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"bytes"
 )
 
 func init() {
@@ -234,6 +235,75 @@ func TestPatch(t *testing.T) {
 	assert.Equal(t, resp.RawText(), "")
 }
 
+func TestRawRequestWithData(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(HandleRaw))
+	defer srv.Close()
+
+	var payload = bytes.NewBufferString("napping")
+	res := structType {}
+	req := Request {
+		Url: "http://" + srv.Listener.Addr().String(),
+		Method: "PUT",
+		RawPayload: true,
+		Payload: payload,
+		Result: &res,
+	}
+
+	resp, err := Send(&req)
+	if err != nil {
+		t.Error(err)
+	}
+
+	assert.Equal(t, resp.Status(), 200)
+	assert.Equal(t, res.Bar, "napping")
+}
+
+func TestRawRequestWithoutData(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(HandleRaw))
+	defer srv.Close()
+
+	var payload *bytes.Buffer = nil
+	res := structType {}
+	req := Request {
+		Url: "http://" + srv.Listener.Addr().String(),
+		Method: "PUT",
+		RawPayload: true,
+		Payload: payload,
+		Result: &res,
+	}
+
+	resp, err := Send(&req)
+	if err != nil {
+		t.Error(err)
+	}
+
+	assert.Equal(t, resp.Status(), 200)
+	assert.Equal(t, res.Bar, "empty")
+}
+
+func TestRawRequestInvalidType(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(HandleRaw))
+	defer srv.Close()
+
+	payload := structType {}
+	res := structType {}
+	req := Request {
+		Url: "http://" + srv.Listener.Addr().String(),
+		Method: "PUT",
+		RawPayload: true,
+		Payload: payload,
+		Result: &res,
+	}
+
+	_, err := Send(&req)
+
+	if err == nil {
+		t.Error("Validation error expected")
+	} else {
+		assert.Equal(t, err.Error(), "Payload must be of type *bytes.Buffer if RawPayload is set to true")
+	}
+}
+
 func JsonError(w http.ResponseWriter, msg string, code int) {
 	e := errorStruct{
 		Status:  code,
@@ -410,5 +480,37 @@ func HandlePatch(w http.ResponseWriter, req *http.Request) {
 		JsonError(w, msg, http.StatusBadRequest)
 		return
 	}
+	return
+}
+
+func HandleRaw(w http.ResponseWriter, req *http.Request) {
+	var err error
+	var result = structType {}
+	if req.ContentLength <= 0 {
+		result.Bar = "empty"
+	} else {
+		var body []byte
+		body, err = ioutil.ReadAll(req.Body)
+		if err == nil {
+			result.Bar = string(body)
+		}
+ 	}
+
+	if err != nil {
+		JsonError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var blob []byte
+	blob, err = json.Marshal(result)
+
+	if err != nil {
+		JsonError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Add("content-type", "application/json")
+	w.Write(blob)
+
 	return
 }
