@@ -12,7 +12,9 @@ requests (cookies, auth, proxies).
 
 import (
 	"bytes"
+	"errors"
 	"encoding/json"
+	"encoding/base64"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -85,15 +87,31 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 		}
 	}
 	var req *http.Request
+	var buf *bytes.Buffer
 	if r.Payload != nil {
-		var b []byte
-		b, err = json.Marshal(&r.Payload)
-		if err != nil {
-			s.log(err)
-			return
+		if r.RawPayload {
+			var ok bool
+			// buf can be nil interface at this point
+			// so we'll do extra nil check
+			buf, ok = r.Payload.(*bytes.Buffer)
+			if !ok {
+				err = errors.New("Payload must be of type *bytes.Buffer if RawPayload is set to true")
+				return
+			}
+		} else {
+			var b []byte
+			b, err = json.Marshal(&r.Payload)
+			if err != nil {
+				s.log(err)
+				return
+			}
+			buf = bytes.NewBuffer(b)
 		}
-		buf := bytes.NewBuffer(b)
-		req, err = http.NewRequest(r.Method, u.String(), buf)
+		if buf != nil {
+			req, err = http.NewRequest(r.Method, u.String(), buf)
+		} else {
+			req, err = http.NewRequest(r.Method, u.String(), nil)
+		}
 		if err != nil {
 			s.log(err)
 			return
@@ -150,8 +168,11 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 	s.log("--------------------------------------------------------------------------------")
 	s.log(pretty(req))
 	s.log("Payload:")
-	s.log(pretty(r.Payload))
-
+	if r.RawPayload && s.Log && buf != nil {
+		s.log(base64.StdEncoding.EncodeToString(buf.Bytes()))
+	} else {
+		s.log(pretty(r.Payload))
+	}
 	r.timestamp = time.Now()
 	var client *http.Client
 	if s.Client != nil {
