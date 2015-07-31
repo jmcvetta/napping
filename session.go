@@ -27,6 +27,8 @@ import (
 	"time"
 )
 
+// these enum constants are used to declaratively assign session encoding
+// default is JSON
 const (
 	JSON = iota
 	XML
@@ -334,6 +336,7 @@ func (s *Session) log(args ...interface{}) {
 	}
 }
 
+// log the raw text of a response
 func (s *Session) logRaw(response *Response) {
 	switch s.Encoding {
 	case JSON:
@@ -346,6 +349,7 @@ func (s *Session) logRaw(response *Response) {
 	panic("invalid encoding")
 }
 
+// log a Go representation of a value, with caller context information
 func (s *Session) logWithContext(v interface{}) {
 	if s.Log {
 		// Get source file and line
