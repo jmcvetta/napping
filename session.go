@@ -13,8 +13,6 @@ requests (cookies, auth, proxies).
 import (
 	"bytes"
 	"encoding/base64"
-	"encoding/json"
-	"encoding/xml"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -27,14 +25,8 @@ import (
 	"time"
 )
 
-// these enum constants are used to declaratively assign session encoding
-// default is JSON
-const (
-	JSON = iota
-	XML
-)
-
 type Session struct {
+	EncodingMarshaller
 	Client *http.Client
 	Log    bool // Log request and response
 
@@ -44,8 +36,6 @@ type Session struct {
 	// Optional defaults - can be overridden in a Request
 	Header *http.Header
 	Params *Params
-
-	Encoding int
 }
 
 // Send constructs and sends an HTTP request.
@@ -111,7 +101,7 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 			}
 		} else {
 			var b []byte
-			b, err = s.marshal(&r.Payload)
+			b, err = s.Marshal(&r.Payload)
 			if err != nil {
 				s.log(err)
 				return
@@ -209,10 +199,10 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 	}
 	if string(r.body) != "" {
 		if resp.StatusCode < 300 && r.Result != nil {
-			err = s.unmarshal(r.body, r.Result)
+			err = s.Unmarshal(r.body, r.Result)
 		}
 		if resp.StatusCode >= 400 && r.Error != nil {
-			_ = s.unmarshal(r.body, r.Error) // Should we ignore unmarshall error?
+			_ = s.Unmarshal(r.body, r.Error) // Should we ignore unmarshall error?
 		}
 	}
 	rsp := Response(*r)
@@ -249,11 +239,12 @@ func (s *Session) getContentType() string {
 // Get sends a GET request.
 func (s *Session) Get(url string, p *Params, result, errMsg interface{}) (*Response, error) {
 	r := Request{
-		Method: "GET",
-		Url:    url,
-		Params: p,
-		Result: result,
-		Error:  errMsg,
+		Method:             "GET",
+		Url:                url,
+		Params:             p,
+		Result:             result,
+		Error:              errMsg,
+		EncodingMarshaller: EncodingMarshaller{Encoding: s.Encoding},
 	}
 	return s.Send(&r)
 }
@@ -361,24 +352,4 @@ func (s *Session) logWithContext(v interface{}) {
 		// Make that all pretty together
 		s.log(fmt.Sprintf("%s:%d: \n%+v\n", filename, line, v))
 	}
-}
-
-func (s *Session) marshal(v interface{}) ([]byte, error) {
-	switch s.Encoding {
-	case JSON:
-		return json.Marshal(v)
-	case XML:
-		return xml.Marshal(v)
-	}
-	panic("invalid encoding")
-}
-
-func (s *Session) unmarshal(data []byte, v interface{}) error {
-	switch s.Encoding {
-	case JSON:
-		return json.Unmarshal(data, v)
-	case XML:
-		return xml.Unmarshal(data, v)
-	}
-	panic("invalid encoding")
 }
