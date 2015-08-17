@@ -8,7 +8,7 @@ package napping
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/bmizerany/assert"
+	"github.com/jadengore/assert"
 	"io/ioutil"
 	"log"
 	"net/http"
