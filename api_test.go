@@ -6,16 +6,16 @@
 package napping
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/bmizerany/assert"
+	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
-	"bytes"
 )
 
 func init() {
@@ -240,13 +240,13 @@ func TestRawRequestWithData(t *testing.T) {
 	defer srv.Close()
 
 	var payload = bytes.NewBufferString("napping")
-	res := structType {}
-	req := Request {
-		Url: "http://" + srv.Listener.Addr().String(),
-		Method: "PUT",
+	res := structType{}
+	req := Request{
+		Url:        "http://" + srv.Listener.Addr().String(),
+		Method:     "PUT",
 		RawPayload: true,
-		Payload: payload,
-		Result: &res,
+		Payload:    payload,
+		Result:     &res,
 	}
 
 	resp, err := Send(&req)
@@ -263,13 +263,13 @@ func TestRawRequestWithoutData(t *testing.T) {
 	defer srv.Close()
 
 	var payload *bytes.Buffer = nil
-	res := structType {}
-	req := Request {
-		Url: "http://" + srv.Listener.Addr().String(),
-		Method: "PUT",
+	res := structType{}
+	req := Request{
+		Url:        "http://" + srv.Listener.Addr().String(),
+		Method:     "PUT",
 		RawPayload: true,
-		Payload: payload,
-		Result: &res,
+		Payload:    payload,
+		Result:     &res,
 	}
 
 	resp, err := Send(&req)
@@ -285,14 +285,14 @@ func TestRawRequestInvalidType(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(HandleRaw))
 	defer srv.Close()
 
-	payload := structType {}
-	res := structType {}
-	req := Request {
-		Url: "http://" + srv.Listener.Addr().String(),
-		Method: "PUT",
+	payload := structType{}
+	res := structType{}
+	req := Request{
+		Url:        "http://" + srv.Listener.Addr().String(),
+		Method:     "PUT",
 		RawPayload: true,
-		Payload: payload,
-		Result: &res,
+		Payload:    payload,
+		Result:     &res,
 	}
 
 	_, err := Send(&req)
@@ -485,7 +485,7 @@ func HandlePatch(w http.ResponseWriter, req *http.Request) {
 
 func HandleRaw(w http.ResponseWriter, req *http.Request) {
 	var err error
-	var result = structType {}
+	var result = structType{}
 	if req.ContentLength <= 0 {
 		result.Bar = "empty"
 	} else {
@@ -494,7 +494,7 @@ func HandleRaw(w http.ResponseWriter, req *http.Request) {
 		if err == nil {
 			result.Bar = string(body)
 		}
- 	}
+	}
 
 	if err != nil {
 		JsonError(w, err.Error(), http.StatusInternalServerError)
