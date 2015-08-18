@@ -12,20 +12,21 @@ requests (cookies, auth, proxies).
 
 import (
 	"bytes"
-	"errors"
-	"encoding/json"
 	"encoding/base64"
+	"errors"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
+	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 )
 
-import ()
-
 type Session struct {
+	EncodingMarshaller
 	Client *http.Client
 	Log    bool // Log request and response
 
@@ -76,7 +77,7 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 	}
 	u.RawQuery = vals.Encode()
 	//
-	// Create a Request object; if populated, Data field is JSON encoded as
+	// Create a Request object; if populated, Data field is encoded as
 	// request body
 	//
 	header := http.Header{}
@@ -100,7 +101,7 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 			}
 		} else {
 			var b []byte
-			b, err = json.Marshal(&r.Payload)
+			b, err = s.Marshal(&r.Payload)
 			if err != nil {
 				s.log(err)
 				return
@@ -116,7 +117,7 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 			s.log(err)
 			return
 		}
-		header.Add("Content-Type", "application/json")
+		header.Add("Content-Type", s.getContentType())
 	} else { // no data to encode
 		req, err = http.NewRequest(r.Method, u.String(), nil)
 		if err != nil {
@@ -145,7 +146,7 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 		}
 	}
 	if header.Get("Accept") == "" {
-		header.Add("Accept", "application/json") // Default, can be overridden with Opts
+		header.Add("Accept", s.getContentType()) // Default, can be overridden with Opts
 	}
 	req.Header = header
 	//
@@ -166,12 +167,12 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 	s.log("--------------------------------------------------------------------------------")
 	s.log("REQUEST")
 	s.log("--------------------------------------------------------------------------------")
-	s.log(pretty(req))
+	s.logWithContext(req)
 	s.log("Payload:")
 	if r.RawPayload && s.Log && buf != nil {
 		s.log(base64.StdEncoding.EncodeToString(buf.Bytes()))
 	} else {
-		s.log(pretty(r.Payload))
+		s.logWithContext(r.Payload)
 	}
 	r.timestamp = time.Now()
 	var client *http.Client
@@ -198,10 +199,10 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 	}
 	if string(r.body) != "" {
 		if resp.StatusCode < 300 && r.Result != nil {
-			err = json.Unmarshal(r.body, r.Result)
+			err = s.Unmarshal(r.body, r.Result)
 		}
 		if resp.StatusCode >= 400 && r.Error != nil {
-			json.Unmarshal(r.body, r.Error) // Should we ignore unmarshall error?
+			_ = s.Unmarshal(r.body, r.Error) // Should we ignore unmarshall error?
 		}
 	}
 	rsp := Response(*r)
@@ -213,16 +214,11 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 	s.log("--------------------------------------------------------------------------------")
 	s.log("Status: ", response.status)
 	s.log("Header:")
-	s.log(pretty(response.HttpResponse().Header))
+	s.logWithContext(response.HttpResponse().Header)
 	s.log("Body:")
 
 	if response.body != nil {
-		raw := json.RawMessage{}
-		if json.Unmarshal(response.body, &raw) == nil {
-			s.log(pretty(&raw))
-		} else {
-			s.log(pretty(response.RawText()))
-		}
+		s.logRaw(response)
 	} else {
 		s.log("Empty response body")
 	}
@@ -230,14 +226,25 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 	return
 }
 
+func (s *Session) getContentType() string {
+	switch s.Encoding {
+	case JSON:
+		return "application/json"
+	case XML:
+		return "application/xml"
+	}
+	panic("invalid encoding")
+}
+
 // Get sends a GET request.
 func (s *Session) Get(url string, p *Params, result, errMsg interface{}) (*Response, error) {
 	r := Request{
-		Method: "GET",
-		Url:    url,
-		Params: p,
-		Result: result,
-		Error:  errMsg,
+		Method:             "GET",
+		Url:                url,
+		Params:             p,
+		Result:             result,
+		Error:              errMsg,
+		EncodingMarshaller: EncodingMarshaller{Encoding: s.Encoding},
 	}
 	return s.Send(&r)
 }
@@ -317,5 +324,32 @@ func (s *Session) Delete(url string, result, errMsg interface{}) (*Response, err
 func (s *Session) log(args ...interface{}) {
 	if s.Log {
 		log.Println(args...)
+	}
+}
+
+// log the raw text of a response
+func (s *Session) logRaw(response *Response) {
+	switch s.Encoding {
+	case JSON:
+		s.logWithContext(response.RawText())
+		return
+	case XML:
+		s.logWithContext(response.RawText())
+		return
+	}
+	panic("invalid encoding")
+}
+
+// log a Go representation of a value, with caller context information
+func (s *Session) logWithContext(v interface{}) {
+	if s.Log {
+		// Get source file and line
+		_, file, line, _ := runtime.Caller(1)
+
+		// Get relative filename
+		filename := filepath.Base(file)
+
+		// Make that all pretty together
+		s.log(fmt.Sprintf("%s:%d: \n%+v\n", filename, line, v))
 	}
 }
