@@ -6,6 +6,7 @@
 package napping
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/url"
 	"strings"
@@ -20,11 +21,10 @@ type Params map[string]string
 // a  single object for both the request and the response we allow easy access
 // to Result and Error objects without needing type assertions.
 type Request struct {
-	EncodingMarshaller
 	Url     string      // Raw URL string
 	Method  string      // HTTP method to use
 	Params  *Params     // URL query parameters
-	Payload interface{} // Data to encode and POST
+	Payload interface{} // Data to JSON-encode and POST
 
 	// Can be set to true if Payload is of type *bytes.Buffer and client wants
 	// to send it as-is
@@ -46,7 +46,7 @@ type Request struct {
 	timestamp time.Time      // Time when HTTP request was sent
 	status    int            // HTTP status for executed request
 	response  *http.Response // Response object from http package
-	body      []byte         // Body of server's response (JSON/XML or otherwise)
+	body      []byte         // Body of server's response (JSON or otherwise)
 }
 
 // A Response is a Request object that has been executed.
@@ -73,8 +73,8 @@ func (r *Response) HttpResponse() *http.Response {
 	return r.response
 }
 
-// UnmarshalBody parses the JSON/XML-encoded data in the server's response,
-// and stores the result in the value pointed to by v.
-func (r *Response) UnmarshalBody(v interface{}) error {
-	return r.Unmarshal(r.body, v)
+// Unmarshal parses the JSON-encoded data in the server's response, and stores
+// the result in the value pointed to by v.
+func (r *Response) Unmarshal(v interface{}) error {
+	return json.Unmarshal(r.body, v)
 }

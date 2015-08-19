@@ -67,9 +67,10 @@ func TestGet(t *testing.T) {
 	//
 	// Good request
 	//
+	url := "http://" + srv.Listener.Addr().String()
 	p := fooParams
 	res := structType{}
-	resp, err := Get(srv.URL, &p, &res, nil)
+	resp, err := Get(url, &p, &res, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -78,9 +79,10 @@ func TestGet(t *testing.T) {
 	//
 	// Bad request
 	//
+	url = "http://" + srv.Listener.Addr().String()
 	p = Params{"bad": "value"}
 	e := errorStruct{}
-	resp, err = Get(srv.URL, &p, nil, nil)
+	resp, err = Get(url, &p, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -92,7 +94,7 @@ func TestGet(t *testing.T) {
 		Message: "Bad query params: bad=value",
 		Status:  500,
 	}
-	resp.UnmarshalBody(&e)
+	resp.Unmarshal(&e)
 	assert.Equal(t, e, expected)
 }
 
@@ -103,12 +105,13 @@ func TestDefaultParams(t *testing.T) {
 	//
 	// Good request
 	//
+	url := "http://" + srv.Listener.Addr().String()
 	p := fooParams
 	res := structType{}
 	s := Session{
 		Params: &p,
 	}
-	resp, err := s.Get(srv.URL, nil, &res, nil)
+	resp, err := s.Get(url, nil, &res, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -117,9 +120,10 @@ func TestDefaultParams(t *testing.T) {
 	//
 	// Bad request
 	//
+	url = "http://" + srv.Listener.Addr().String()
 	p = Params{"bad": "value"}
 	e := errorStruct{}
-	resp, err = Get(srv.URL, &p, nil, nil)
+	resp, err = Get(url, &p, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -131,14 +135,15 @@ func TestDefaultParams(t *testing.T) {
 		Message: "Bad query params: bad=value",
 		Status:  500,
 	}
-	resp.UnmarshalBody(&e)
+	resp.Unmarshal(&e)
 	assert.Equal(t, e, expected)
 }
 
 func TestDelete(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(HandleDelete))
 	defer srv.Close()
-	resp, err := Delete(srv.URL, nil, nil)
+	url := "http://" + srv.Listener.Addr().String()
+	resp, err := Delete(url, nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -149,7 +154,8 @@ func TestHead(t *testing.T) {
 	// TODO: test result
 	srv := httptest.NewServer(http.HandlerFunc(HandleHead))
 	defer srv.Close()
-	resp, err := Head(srv.URL, nil, nil)
+	url := "http://" + srv.Listener.Addr().String()
+	resp, err := Head(url, nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -160,7 +166,8 @@ func TestOptions(t *testing.T) {
 	// TODO: test result
 	srv := httptest.NewServer(http.HandlerFunc(HandleOptions))
 	defer srv.Close()
-	resp, err := Options(srv.URL, nil, nil)
+	url := "http://" + srv.Listener.Addr().String()
+	resp, err := Options(url, nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -172,9 +179,10 @@ func TestPost(t *testing.T) {
 	defer srv.Close()
 	s := Session{}
 	s.Log = true
+	url := "http://" + srv.Listener.Addr().String()
 	payload := fooStruct
 	res := structType{}
-	resp, err := s.Post(srv.URL, &payload, &res, nil)
+	resp, err := s.Post(url, &payload, &res, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -182,14 +190,15 @@ func TestPost(t *testing.T) {
 	assert.Equal(t, res, barStruct)
 }
 
-func TestPostUnmarshallableJSON(t *testing.T) {
+func TestPostUnmarshallable(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(HandlePost))
 	defer srv.Close()
 	type ft func()
 	var f ft
+	url := "http://" + srv.Listener.Addr().String()
 	res := structType{}
 	payload := f
-	_, err := Post(srv.URL, &payload, &res, nil)
+	_, err := Post(url, &payload, &res, nil)
 	assert.NotEqual(t, nil, err)
 	_, ok := err.(*json.UnsupportedTypeError)
 	if !ok {
@@ -201,8 +210,9 @@ func TestPostUnmarshallableJSON(t *testing.T) {
 func TestPut(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(HandlePut))
 	defer srv.Close()
+	url := "http://" + srv.Listener.Addr().String()
 	res := structType{}
-	resp, err := Put(srv.URL, &fooStruct, &res, nil)
+	resp, err := Put(url, &fooStruct, &res, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -214,8 +224,9 @@ func TestPut(t *testing.T) {
 func TestPatch(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(HandlePatch))
 	defer srv.Close()
+	url := "http://" + srv.Listener.Addr().String()
 	res := structType{}
-	resp, err := Patch(srv.URL, &fooStruct, &res, nil)
+	resp, err := Patch(url, &fooStruct, &res, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -231,7 +242,7 @@ func TestRawRequestWithData(t *testing.T) {
 	var payload = bytes.NewBufferString("napping")
 	res := structType{}
 	req := Request{
-		Url:        srv.URL,
+		Url:        "http://" + srv.Listener.Addr().String(),
 		Method:     "PUT",
 		RawPayload: true,
 		Payload:    payload,
@@ -254,7 +265,7 @@ func TestRawRequestWithoutData(t *testing.T) {
 	var payload *bytes.Buffer = nil
 	res := structType{}
 	req := Request{
-		Url:        srv.URL,
+		Url:        "http://" + srv.Listener.Addr().String(),
 		Method:     "PUT",
 		RawPayload: true,
 		Payload:    payload,
@@ -277,7 +288,7 @@ func TestRawRequestInvalidType(t *testing.T) {
 	payload := structType{}
 	res := structType{}
 	req := Request{
-		Url:        srv.URL,
+		Url:        "http://" + srv.Listener.Addr().String(),
 		Method:     "PUT",
 		RawPayload: true,
 		Payload:    payload,
