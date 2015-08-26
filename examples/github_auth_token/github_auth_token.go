@@ -37,7 +37,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	passwd, err := gopass.GetPass("Github password: ")
+	fmt.Printf("github.com/howeyc/gopass")
+	passwd := gopass.GetPasswd()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -83,7 +84,7 @@ func main() {
 	// can also be configured on a per-request basis when using Send().
 	//
 	s := napping.Session{
-		Userinfo: url.UserPassword(username, passwd),
+		Userinfo: url.UserPassword(username, string(passwd)),
 	}
 	url := "https://api.github.com/authorizations"
 	//
