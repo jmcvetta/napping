@@ -6,6 +6,7 @@
 package napping
 
 import (
+	"bytes"
 	"encoding/json"
 	"net/http"
 	"net/url"
@@ -33,6 +34,12 @@ type Request struct {
 	// Result is a pointer to a data structure.  On success (HTTP status < 300),
 	// response from server is unmarshaled into Result.
 	Result interface{}
+
+	// CaptureResponseBody can be set to capture the response body for external use.
+	CaptureResponseBody bool
+
+	// ResponseBody exports the raw response body if CaptureResponseBody is true.
+	ResponseBody *bytes.Buffer
 
 	// Error is a pointer to a data structure.  On error (HTTP status >= 300),
 	// response from server is unmarshaled into Error.

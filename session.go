@@ -12,9 +12,9 @@ requests (cookies, auth, proxies).
 
 import (
 	"bytes"
-	"errors"
-	"encoding/json"
 	"encoding/base64"
+	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -204,6 +204,9 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 		if resp.StatusCode >= 400 && r.Error != nil {
 			json.Unmarshal(r.body, r.Error) // Should we ignore unmarshall error?
 		}
+	}
+	if r.CaptureResponseBody {
+		r.ResponseBody = bytes.NewBuffer(r.body)
 	}
 	rsp := Response(*r)
 	response = &rsp
