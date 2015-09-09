@@ -64,8 +64,7 @@ func main() {
 
 	url = "http://httpbin.org/get"
 	fmt.Println("URL:>", url)
-	fooParams := napping.Params{"foo": "bar"}
-	p := fooParams
+	p := napping.Params{"foo": "bar"}.AsUrlValues()
 
 	res = ResponseUserAgent{}
 	resp, err = s.Get(url, &p, &res, nil)
