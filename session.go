@@ -34,7 +34,7 @@ type Session struct {
 
 	// Optional defaults - can be overridden in a Request
 	Header *http.Header
-	Params *Params
+	Params *url.Values
 }
 
 // Send constructs and sends an HTTP request.
@@ -53,7 +53,7 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 	//
 	// Default query parameters
 	//
-	p := Params{}
+	p := url.Values{}
 	if s.Params != nil {
 		for k, v := range *s.Params {
 			p[k] = v
@@ -70,11 +70,7 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 	//
 	// Encode parameters
 	//
-	vals := u.Query()
-	for k, v := range p {
-		vals.Set(k, v)
-	}
-	u.RawQuery = vals.Encode()
+	u.RawQuery = p.Encode()
 	//
 	// Create a Request object; if populated, Data field is JSON encoded as
 	// request body
@@ -232,7 +228,7 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 }
 
 // Get sends a GET request.
-func (s *Session) Get(url string, p *Params, result, errMsg interface{}) (*Response, error) {
+func (s *Session) Get(url string, p *url.Values, result, errMsg interface{}) (*Response, error) {
 	r := Request{
 		Method: "GET",
 		Url:    url,

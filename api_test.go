@@ -68,7 +68,7 @@ func TestGet(t *testing.T) {
 	// Good request
 	//
 	url := "http://" + srv.Listener.Addr().String()
-	p := fooParams
+	p := fooParams.AsUrlValues()
 	res := structType{}
 	resp, err := Get(url, &p, &res, nil)
 	if err != nil {
@@ -80,7 +80,7 @@ func TestGet(t *testing.T) {
 	// Bad request
 	//
 	url = "http://" + srv.Listener.Addr().String()
-	p = Params{"bad": "value"}
+	p = Params{"bad": "value"}.AsUrlValues()
 	e := errorStruct{}
 	resp, err = Get(url, &p, nil, nil)
 	if err != nil {
@@ -106,7 +106,7 @@ func TestDefaultParams(t *testing.T) {
 	// Good request
 	//
 	url := "http://" + srv.Listener.Addr().String()
-	p := fooParams
+	p := fooParams.AsUrlValues()
 	res := structType{}
 	s := Session{
 		Params: &p,
@@ -121,7 +121,7 @@ func TestDefaultParams(t *testing.T) {
 	// Bad request
 	//
 	url = "http://" + srv.Listener.Addr().String()
-	p = Params{"bad": "value"}
+	p = Params{"bad": "value"}.AsUrlValues()
 	e := errorStruct{}
 	resp, err = Get(url, &p, nil, nil)
 	if err != nil {
