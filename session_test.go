@@ -17,6 +17,7 @@ import (
 	"regexp"
 	"strings"
 	"testing"
+	"github.com/stretchr/testify/assert"
 )
 
 func init() {
@@ -49,14 +50,14 @@ type pair struct {
 	hf hfunc
 }
 
-func paramHandler(t *testing.T, p Params, f hfunc) hfunc {
+func paramHandler(t *testing.T, p url.Values, f hfunc) hfunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		if f != nil {
 			f(w, req)
 		}
 		q := req.URL.Query()
 		for k, _ := range p {
-			if p[k] != q.Get(k) {
+			if !assert.Equal(t,p[k],q[k]) {
 				msg := "Bad query params: " + q.Encode()
 				t.Error(msg)
 				return
@@ -166,7 +167,7 @@ func TestRequest(t *testing.T) {
 		// Params
 		//
 		if test.params {
-			p := Params{key: value}
+			p := Params{key: value}.AsUrlValues()
 			f := paramHandler(t, p, nil)
 			allHF = paramHandler(t, p, allHF)
 			r = baseReq
