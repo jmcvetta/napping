@@ -112,7 +112,8 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 			s.log(err)
 			return
 		}
-		header.Add("Content-Type", "application/json")
+		// Overwrite the content type to json since we're pushing the payload as json
+		header.Set("Content-Type", "application/json")
 	} else { // no data to encode
 		req, err = http.NewRequest(r.Method, u.String(), nil)
 		if err != nil {
