@@ -304,6 +304,35 @@ func TestRawRequestInvalidType(t *testing.T) {
 	}
 }
 
+// TestRawResponse tests capturing the raw response body.
+func TestRawResponse(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(HandleRaw))
+	defer srv.Close()
+
+	var payload = bytes.NewBufferString("napping")
+	req := Request{
+		Url:                 "http://" + srv.Listener.Addr().String(),
+		Method:              "PUT",
+		RawPayload:          true,
+		CaptureResponseBody: true,
+		Payload:             payload,
+	}
+
+	resp, err := Send(&req)
+	if err != nil {
+		t.Error(err)
+	}
+
+	assert.Equal(t, resp.Status(), 200)
+	rawResponseStruct := structType{
+		Foo: 0,
+		Bar: "napping",
+	}
+
+	blob, err := json.Marshal(rawResponseStruct)
+	assert.Equal(t, bytes.Equal(resp.ResponseBody.Bytes(), blob), true)
+}
+
 func JsonError(w http.ResponseWriter, msg string, code int) {
 	e := errorStruct{
 		Status:  code,
