@@ -56,7 +56,7 @@ func Patch(url string, payload, result, errMsg interface{}) (*Response, error) {
 }
 
 // Delete sends a DELETE request.
-func Delete(url string, result, errMsg interface{}) (*Response, error) {
+func Delete(url string, p *url.Values, result, errMsg interface{}) (*Response, error) {
 	s := Session{}
-	return s.Delete(url, result, errMsg)
+	return s.Delete(url, p, result, errMsg)
 }

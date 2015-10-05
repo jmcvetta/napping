@@ -302,10 +302,11 @@ func (s *Session) Patch(url string, payload, result, errMsg interface{}) (*Respo
 }
 
 // Delete sends a DELETE request.
-func (s *Session) Delete(url string, result, errMsg interface{}) (*Response, error) {
+func (s *Session) Delete(url string, p *url.Values, result, errMsg interface{}) (*Response, error) {
 	r := Request{
 		Method: "DELETE",
 		Url:    url,
+		Params: p,
 		Result: result,
 		Error:  errMsg,
 	}
