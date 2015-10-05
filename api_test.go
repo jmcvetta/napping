@@ -143,7 +143,7 @@ func TestDelete(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(HandleDelete))
 	defer srv.Close()
 	url := "http://" + srv.Listener.Addr().String()
-	resp, err := Delete(url, nil, nil)
+	resp, err := Delete(url, nil, nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
