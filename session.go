@@ -60,6 +60,14 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 		}
 	}
 	//
+	// Parameters that were present in URL
+	//
+	if u.Query() != nil {
+		for k, v := range u.Query() {
+			p[k] = v
+		}
+	}
+	//
 	// User-supplied params override default
 	//
 	if r.Params != nil {
@@ -71,6 +79,10 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 	// Encode parameters
 	//
 	u.RawQuery = p.Encode()
+	//
+	// Attach params to response
+	//
+	r.Params = &p
 	//
 	// Create a Request object; if populated, Data field is JSON encoded as
 	// request body
@@ -163,7 +175,10 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 	s.log("--------------------------------------------------------------------------------")
 	s.log("REQUEST")
 	s.log("--------------------------------------------------------------------------------")
-	s.log(pretty(req))
+	s.log("Method:", req.Method)
+	s.log("URL:", req.URL)
+	s.log("Header:", req.Header)
+	s.log("Form:", req.Form)
 	s.log("Payload:")
 	if r.RawPayload && s.Log && buf != nil {
 		s.log(base64.StdEncoding.EncodeToString(buf.Bytes()))
@@ -186,6 +201,7 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 	defer resp.Body.Close()
 	r.status = resp.StatusCode
 	r.response = resp
+
 	//
 	// Unmarshal
 	//

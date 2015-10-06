@@ -19,12 +19,11 @@ type Params map[string]string
 
 func (p Params) AsUrlValues() url.Values {
 	result := url.Values{}
-	for key,value := range p {
-		result.Set(key,value)
+	for key, value := range p {
+		result.Set(key, value)
 	}
 	return result
 }
-
 
 // A Request describes an HTTP request to be executed, data structures into
 // which the result will be unmarshalled, and the server's response. By using
@@ -33,7 +32,7 @@ func (p Params) AsUrlValues() url.Values {
 type Request struct {
 	Url     string      // Raw URL string
 	Method  string      // HTTP method to use
-	Params  *url.Values     // URL query parameters
+	Params  *url.Values // URL query parameters
 	Payload interface{} // Data to JSON-encode and POST
 
 	// Can be set to true if Payload is of type *bytes.Buffer and client wants

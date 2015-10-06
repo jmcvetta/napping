@@ -9,6 +9,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"github.com/jmcvetta/randutil"
+	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -17,7 +18,6 @@ import (
 	"regexp"
 	"strings"
 	"testing"
-	"github.com/stretchr/testify/assert"
 )
 
 func init() {
@@ -57,7 +57,7 @@ func paramHandler(t *testing.T, p url.Values, f hfunc) hfunc {
 		}
 		q := req.URL.Query()
 		for k, _ := range p {
-			if !assert.Equal(t,p[k],q[k]) {
+			if !assert.Equal(t, p[k], q[k]) {
 				msg := "Bad query params: " + q.Encode()
 				t.Error(msg)
 				return
