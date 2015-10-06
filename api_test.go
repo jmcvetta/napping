@@ -14,6 +14,7 @@ import (
 	"log"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"strings"
 	"testing"
 )
@@ -205,6 +206,24 @@ func TestPostUnmarshallable(t *testing.T) {
 		t.Log(err)
 		t.Error("Expected json.UnsupportedTypeError")
 	}
+}
+
+func TestPostParamsInUrl(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(HandlePost))
+	defer srv.Close()
+	s := Session{}
+	s.Log = true
+	u := "http://" + srv.Listener.Addr().String()
+	u += "?spam=eggs" // Add query params to URL
+	payload := fooStruct
+	res := structType{}
+	resp, err := s.Post(u, &payload, &res, nil)
+	if err != nil {
+		t.Error(err)
+	}
+	expected := &url.Values{}
+	expected.Add("spam", "eggs")
+	assert.Equal(t, expected, resp.Params)
 }
 
 func TestPut(t *testing.T) {
