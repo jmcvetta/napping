@@ -23,8 +23,6 @@ import (
 	"time"
 )
 
-import ()
-
 type Session struct {
 	Client *http.Client
 	Log    bool // Log request and response

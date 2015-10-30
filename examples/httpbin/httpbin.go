@@ -55,7 +55,7 @@ func main() {
 		// resp.Unmarshal(&e)
 		fmt.Println("res:", res.Useragent)
 	} else {
-		fmt.Println("Bad response status from Github server")
+		fmt.Println("Bad response status from httpbin server")
 		fmt.Printf("\t Status:  %v\n", resp.Status())
 		fmt.Printf("\t Message: %v\n", e.Message)
 	}
