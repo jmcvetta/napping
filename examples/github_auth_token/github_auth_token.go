@@ -16,8 +16,8 @@ NOTE: This example may only work on *nix systems due to gopass requirements.
 import (
 	"fmt"
 	"github.com/howeyc/gopass"
-	"github.com/jmcvetta/napping"
 	"github.com/kr/pretty"
+	"gopkg.in/jmcvetta/napping.v3"
 	"log"
 	"net/url"
 	"time"
