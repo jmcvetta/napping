@@ -55,7 +55,7 @@ the repo Issues.  The API is fairly stable but there may be additions and small
 changes from time to time.
 
 
-# Contributing
+## Contributing
 
 Contributions in the form of Pull Requests or Issues are gladly accepted.
 Before submitting a Pull Request, please ensure your code passes all tests, and
@@ -69,6 +69,11 @@ demonstrates the problem.
 ## License
 
 This is Free Software, released under the terms of the [GPL v3][].
+
+Please feel free to make a donation to the author, to support the development
+of this and other Free Software packages.
+
+[![Donate with PayPal](https://img.shields.io/badge/donate-paypal-blue.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=YEXKK27UL48F2)
 
 
 [Go]:           http://golang.org
