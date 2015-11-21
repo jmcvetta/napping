@@ -47,14 +47,6 @@ Check out [github_auth_token][auth-token] for a working example
 showing how to retrieve an auth token from the Github API.
 
 
-## Production Note
-
-If you decide to use Napping in a production system please let me know.  All
-API changes will be made via Pull Request, so it's highly recommended you Watch
-the repo Issues.  The API is fairly stable but there may be additions and small 
-changes from time to time.
-
-
 ## Contributing
 
 Contributions in the form of Pull Requests or Issues are gladly accepted.
