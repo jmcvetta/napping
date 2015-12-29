@@ -47,15 +47,18 @@ Check out [github_auth_token][auth-token] for a working example
 showing how to retrieve an auth token from the Github API.
 
 
+## Support
+
+Paid support and consulting services are available for Napping. Please [contact
+the author](jason.mcvetta@gmail.com) for more details.
+
+
 ## Contributing
 
-Contributions in the form of Pull Requests or Issues are gladly accepted.
-Before submitting a Pull Request, please ensure your code passes all tests, and
-that your changes do not decrease test coverage.  I.e. if you add new features,
-also add corresponding new tests.
-
-When submitting an Issue, if possible please include a failing test case that 
-demonstrates the problem.
+Contributions in the form of Pull Requests are gladly accepted.  Before
+submitting a PR, please ensure your code passes all tests, and that your
+changes do not decrease test coverage.  I.e. if you add new features also add
+corresponding new tests.
 
 
 ## License
