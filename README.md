@@ -49,8 +49,9 @@ showing how to retrieve an auth token from the Github API.
 
 ## Support
 
-Paid support and consulting services are available for Napping. Please [contact
-the author](jason.mcvetta@gmail.com) for more details.
+Paid support, development, and consulting services are available from [Silicon
+Beach Heavy Industries](http://siliconheavy.com).
+
 
 
 ## Contributing
