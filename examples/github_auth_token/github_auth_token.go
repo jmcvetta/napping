@@ -38,7 +38,7 @@ func main() {
 		log.Fatal(err)
 	}
 	fmt.Printf("github.com/howeyc/gopass")
-	passwd := gopass.GetPasswd()
+	passwd, err := gopass.GetPasswd()
 	if err != nil {
 		log.Fatal(err)
 	}
