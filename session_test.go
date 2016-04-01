@@ -6,6 +6,7 @@
 package napping
 
 import (
+	"crypto/tls"
 	"encoding/base64"
 	"encoding/json"
 	"github.com/jmcvetta/randutil"
@@ -206,6 +207,42 @@ func TestRequest(t *testing.T) {
 	}
 }
 
+func TestInvalidTLS(t *testing.T) {
+	srv := httptest.NewTLSServer(http.HandlerFunc(HandleInvalidTLS))
+	defer srv.Close()
+	// The first request, which is supposed to fail, will print something similar to
+	// "20:45:27 server.go:2161: http: TLS handshake error from 127.0.0.1:56293: remote error: bad certificate" to the console.
+	// NOTE: Is this something that should be capture and silently ignored?
+	s := Session{}
+	r := Request{
+		Url:    "https://" + srv.Listener.Addr().String(),
+		Method: "GET",
+	}
+	_, err := s.Send(&r)
+	if err == nil {
+		t.Fatal("Invalid TLS without custom Transport object. The request should have errored out!")
+	}
+
+	s2 := Session{}
+	r2 := Request{
+		Url:    "https://" + srv.Listener.Addr().String(),
+		Method: "GET",
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
+		},
+	}
+
+	resp2, err2 := s2.Send(&r2)
+	if err2 != nil {
+		t.Fatal(err2)
+	}
+	if resp2.Status() != http.StatusOK {
+		t.Fatalf("Expected status %d but got %v\n", http.StatusOK, resp2.Status())
+	}
+}
+
 func TestBasicAuth(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(HandleGetBasicAuth))
 	defer srv.Close()
@@ -254,6 +291,10 @@ func TestStatus(t *testing.T) {}
 func TestUnmarshall(t *testing.T) {}
 
 // func TestUnmarshallFail() {}
+
+func HandleInvalidTLS(w http.ResponseWriter, req *http.Request) {
+	w.WriteHeader(http.StatusOK)
+}
 
 func HandleGetBasicAuth(w http.ResponseWriter, req *http.Request) {
 	authRegex := regexp.MustCompile(`[Bb]asic (?P<encoded>\S+)`)
