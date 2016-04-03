@@ -189,6 +189,10 @@ func (s *Session) Send(r *Request) (response *Response, err error) {
 		client = s.Client
 	} else {
 		client = &http.Client{}
+		if r.Transport != nil {
+			client.Transport = r.Transport
+		}
+
 		s.Client = client
 	}
 	resp, err := client.Do(req)
