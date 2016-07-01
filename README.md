@@ -49,8 +49,8 @@ showing how to retrieve an auth token from the Github API.
 
 ## Support
 
-Paid support, development, and consulting services are available from [Silicon
-Beach Heavy Industries](http://siliconheavy.com).
+Support and consulting services are available from [Silicon Beach Heavy
+Industries](http://siliconheavy.com).
 
 
 
