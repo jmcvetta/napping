@@ -18,7 +18,7 @@ Used by, and developed in conjunction with, [Neoism][].
 
 ### Requirements
 
-Napping requires Go 1.2 or later.
+Napping is [tested with Go 1.3 or later](https://github.com/jmcvetta/napping/blob/develop/.travis.yml#L2).
 
 
 ### Development
