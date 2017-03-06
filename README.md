@@ -8,6 +8,7 @@ library.
 ## Status
 
 [![Travis Build Status](https://travis-ci.org/jmcvetta/napping.png)](https://travis-ci.org/jmcvetta/napping)
+[![Circle CI](https://circleci.com/gh/jmcvetta/napping.svg?style=svg)](https://circleci.com/gh/jmcvetta/napping)
 [![Coveralls](https://coveralls.io/repos/jmcvetta/napping/badge.png)](https://coveralls.io/r/jmcvetta/napping)
 [![Codecov](https://img.shields.io/codecov/c/github/jmcvetta/napping.svg)](https://codecov.io/gh/jmcvetta/napping)
 
