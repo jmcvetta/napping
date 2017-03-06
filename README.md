@@ -7,9 +7,9 @@ library.
 
 ## Status
 
-[![Drone Build Status](https://drone.io/github.com/jmcvetta/napping/status.png)](https://drone.io/github.com/jmcvetta/napping/latest)
 [![Travis Build Status](https://travis-ci.org/jmcvetta/napping.png)](https://travis-ci.org/jmcvetta/napping)
-[![Coverage Status](https://coveralls.io/repos/jmcvetta/restclient/badge.png)](https://coveralls.io/r/jmcvetta/napping)
+[![Coveralls](https://coveralls.io/repos/jmcvetta/napping/badge.png)](https://coveralls.io/r/jmcvetta/napping)
+[![Codecov](https://img.shields.io/codecov/c/github/jmcvetta/napping.svg)](https://codecov.io/gh/jmcvetta/napping)
 
 Used by, and developed in conjunction with, [Neoism][].
 
@@ -18,7 +18,7 @@ Used by, and developed in conjunction with, [Neoism][].
 
 ### Requirements
 
-Napping requires Go 1.2 or later.
+Napping is [tested with Go 1.3 or later](https://github.com/jmcvetta/napping/blob/develop/.travis.yml#L2).
 
 
 ### Development
