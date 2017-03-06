@@ -7,6 +7,7 @@ library.
 
 ## Status
 
+|-----------|-----------------------------------------------------------------------------------------------------------------------|
 | Travis CI | [![Travis Build Status](https://travis-ci.org/jmcvetta/napping.png)](https://travis-ci.org/jmcvetta/napping)          |
 | CircleCI  | [![Circle CI](https://circleci.com/gh/jmcvetta/napping.svg?style=svg)](https://circleci.com/gh/jmcvetta/napping)      |
 | Coveralls | [![Coveralls](https://img.shields.io/coveralls/jmcvetta/napping/master.svg)](https://coveralls.io/r/jmcvetta/napping) |
