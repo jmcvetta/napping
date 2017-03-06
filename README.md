@@ -8,7 +8,7 @@ library.
 ## Status
 
 [![Travis Build Status](https://travis-ci.org/jmcvetta/napping.png)](https://travis-ci.org/jmcvetta/napping)
-[![Coveralls](https://coveralls.io/repos/jmcvetta/restclient/badge.png)](https://coveralls.io/r/jmcvetta/napping)
+[![Coveralls](https://coveralls.io/repos/jmcvetta/napping/badge.png)](https://coveralls.io/r/jmcvetta/napping)
 [![Codecov](https://img.shields.io/codecov/c/github/jmcvetta/napping.svg)](https://codecov.io/gh/jmcvetta/napping)
 
 Used by, and developed in conjunction with, [Neoism][].
