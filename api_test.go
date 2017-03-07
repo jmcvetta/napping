@@ -9,7 +9,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -17,6 +16,8 @@ import (
 	"net/url"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func init() {
@@ -191,7 +192,7 @@ func TestPost(t *testing.T) {
 	assert.Equal(t, res, barStruct)
 }
 
-func TestPostUnmarshallable(t *testing.T) {
+func TestPostUnmarshalable(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(HandlePost))
 	defer srv.Close()
 	type ft func()
@@ -281,7 +282,7 @@ func TestRawRequestWithoutData(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(HandleRaw))
 	defer srv.Close()
 
-	var payload *bytes.Buffer = nil
+	var payload *bytes.Buffer
 	res := structType{}
 	req := Request{
 		Url:        "http://" + srv.Listener.Addr().String(),
@@ -348,11 +349,11 @@ func TestRawResponse(t *testing.T) {
 		Bar: "napping",
 	}
 
-	blob, err := json.Marshal(rawResponseStruct)
+	blob, _ := json.Marshal(rawResponseStruct)
 	assert.Equal(t, bytes.Equal(resp.ResponseBody.Bytes(), blob), true)
 }
 
-func JsonError(w http.ResponseWriter, msg string, code int) {
+func JSONError(w http.ResponseWriter, msg string, code int) {
 	e := errorStruct{
 		Status:  code,
 		Message: msg,
@@ -368,16 +369,16 @@ func JsonError(w http.ResponseWriter, msg string, code int) {
 func HandleGet(w http.ResponseWriter, req *http.Request) {
 	method := strings.ToUpper(req.Method)
 	if method != "GET" {
-		msg := fmt.Sprintf("Expected method GET, received %v", method)
+		msg := fmt.Sprintf("Expected method GET, received %s", method)
 		http.Error(w, msg, 500)
 		return
 	}
 	u := req.URL
 	q := u.Query()
-	for k, _ := range fooParams {
+	for k := range fooParams {
 		if fooParams[k] != q.Get(k) {
 			msg := "Bad query params: " + u.Query().Encode()
-			JsonError(w, msg, http.StatusInternalServerError)
+			JSONError(w, msg, http.StatusInternalServerError)
 			return
 		}
 	}
@@ -386,7 +387,7 @@ func HandleGet(w http.ResponseWriter, req *http.Request) {
 	//
 	blob, err := json.Marshal(barStruct)
 	if err != nil {
-		JsonError(w, err.Error(), http.StatusInternalServerError)
+		JSONError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	req.Header.Add("content-type", "application/json")
@@ -396,7 +397,7 @@ func HandleGet(w http.ResponseWriter, req *http.Request) {
 func HandleDelete(w http.ResponseWriter, req *http.Request) {
 	method := strings.ToUpper(req.Method)
 	if method != "DELETE" {
-		msg := fmt.Sprintf("Expected method DELETE, received %v", method)
+		msg := fmt.Sprintf("Expected method DELETE, received %s", method)
 		http.Error(w, msg, 500)
 		return
 	}
@@ -405,7 +406,7 @@ func HandleDelete(w http.ResponseWriter, req *http.Request) {
 func HandleHead(w http.ResponseWriter, req *http.Request) {
 	method := strings.ToUpper(req.Method)
 	if method != "HEAD" {
-		msg := fmt.Sprintf("Expected method HEAD, received %v", method)
+		msg := fmt.Sprintf("Expected method HEAD, received %s", method)
 		http.Error(w, msg, 500)
 		return
 	}
@@ -414,7 +415,7 @@ func HandleHead(w http.ResponseWriter, req *http.Request) {
 func HandleOptions(w http.ResponseWriter, req *http.Request) {
 	method := strings.ToUpper(req.Method)
 	if method != "OPTIONS" {
-		msg := fmt.Sprintf("Expected method OPTIONS, received %v", method)
+		msg := fmt.Sprintf("Expected method OPTIONS, received %s", method)
 		http.Error(w, msg, 500)
 		return
 	}
@@ -423,7 +424,7 @@ func HandleOptions(w http.ResponseWriter, req *http.Request) {
 func HandlePost(w http.ResponseWriter, req *http.Request) {
 	method := strings.ToUpper(req.Method)
 	if method != "POST" {
-		msg := fmt.Sprintf("Expected method POST, received %v", method)
+		msg := fmt.Sprintf("Expected method POST, received %s", method)
 		http.Error(w, msg, 500)
 		return
 	}
@@ -432,23 +433,23 @@ func HandlePost(w http.ResponseWriter, req *http.Request) {
 	//
 	if req.ContentLength <= 0 {
 		msg := "Content-Length must be greater than 0."
-		JsonError(w, msg, http.StatusLengthRequired)
+		JSONError(w, msg, http.StatusLengthRequired)
 		return
 	}
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
-		JsonError(w, err.Error(), http.StatusInternalServerError)
+		JSONError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	var s structType
 	err = json.Unmarshal(body, &s)
 	if err != nil {
-		JsonError(w, err.Error(), http.StatusBadRequest)
+		JSONError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	if s != fooStruct {
 		msg := "Bad request body"
-		JsonError(w, msg, http.StatusBadRequest)
+		JSONError(w, msg, http.StatusBadRequest)
 		return
 	}
 	//
@@ -456,7 +457,7 @@ func HandlePost(w http.ResponseWriter, req *http.Request) {
 	//
 	blob, err := json.Marshal(barStruct)
 	if err != nil {
-		JsonError(w, err.Error(), http.StatusInternalServerError)
+		JSONError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	req.Header.Add("content-type", "application/json")
@@ -466,7 +467,7 @@ func HandlePost(w http.ResponseWriter, req *http.Request) {
 func HandlePut(w http.ResponseWriter, req *http.Request) {
 	method := strings.ToUpper(req.Method)
 	if method != "PUT" {
-		msg := fmt.Sprintf("Expected method PUT, received %v", method)
+		msg := fmt.Sprintf("Expected method PUT, received %s", method)
 		http.Error(w, msg, 500)
 		return
 	}
@@ -475,23 +476,23 @@ func HandlePut(w http.ResponseWriter, req *http.Request) {
 	//
 	if req.ContentLength <= 0 {
 		msg := "Content-Length must be greater than 0."
-		JsonError(w, msg, http.StatusLengthRequired)
+		JSONError(w, msg, http.StatusLengthRequired)
 		return
 	}
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
-		JsonError(w, err.Error(), http.StatusInternalServerError)
+		JSONError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	var s structType
 	err = json.Unmarshal(body, &s)
 	if err != nil {
-		JsonError(w, err.Error(), http.StatusBadRequest)
+		JSONError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	if s != fooStruct {
 		msg := "Bad request body"
-		JsonError(w, msg, http.StatusBadRequest)
+		JSONError(w, msg, http.StatusBadRequest)
 		return
 	}
 	return
@@ -500,7 +501,7 @@ func HandlePut(w http.ResponseWriter, req *http.Request) {
 func HandlePatch(w http.ResponseWriter, req *http.Request) {
 	method := strings.ToUpper(req.Method)
 	if method != "PATCH" {
-		msg := fmt.Sprintf("Expected method PATCH, received %v", method)
+		msg := fmt.Sprintf("Expected method PATCH, received %s", method)
 		http.Error(w, msg, 500)
 		return
 	}
@@ -509,23 +510,23 @@ func HandlePatch(w http.ResponseWriter, req *http.Request) {
 	//
 	if req.ContentLength <= 0 {
 		msg := "Content-Length must be greater than 0."
-		JsonError(w, msg, http.StatusLengthRequired)
+		JSONError(w, msg, http.StatusLengthRequired)
 		return
 	}
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
-		JsonError(w, err.Error(), http.StatusInternalServerError)
+		JSONError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	var s structType
 	err = json.Unmarshal(body, &s)
 	if err != nil {
-		JsonError(w, err.Error(), http.StatusBadRequest)
+		JSONError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	if s != fooStruct {
 		msg := "Bad request body"
-		JsonError(w, msg, http.StatusBadRequest)
+		JSONError(w, msg, http.StatusBadRequest)
 		return
 	}
 	return
@@ -545,7 +546,7 @@ func HandleRaw(w http.ResponseWriter, req *http.Request) {
 	}
 
 	if err != nil {
-		JsonError(w, err.Error(), http.StatusInternalServerError)
+		JSONError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -553,7 +554,7 @@ func HandleRaw(w http.ResponseWriter, req *http.Request) {
 	blob, err = json.Marshal(result)
 
 	if err != nil {
-		JsonError(w, err.Error(), http.StatusInternalServerError)
+		JSONError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
