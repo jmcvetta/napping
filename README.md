@@ -7,10 +7,12 @@ library.
 
 ## Status
 
-[![Travis Build Status](https://travis-ci.org/jmcvetta/napping.png)](https://travis-ci.org/jmcvetta/napping)
-[![Circle CI](https://circleci.com/gh/jmcvetta/napping.svg?style=svg)](https://circleci.com/gh/jmcvetta/napping)
-[![Coveralls](https://coveralls.io/repos/jmcvetta/napping/badge.png)](https://coveralls.io/r/jmcvetta/napping)
-[![Codecov](https://img.shields.io/codecov/c/github/jmcvetta/napping.svg)](https://codecov.io/gh/jmcvetta/napping)
+| System    | Status                                                                                                                |
+|-----------|:---------------------------------------------------------------------------------------------------------------------:|
+| Travis CI | [![Travis Build Status](https://travis-ci.org/jmcvetta/napping.png)](https://travis-ci.org/jmcvetta/napping)          |
+| CircleCI  | [![Circle CI](https://circleci.com/gh/jmcvetta/napping.svg?style=svg)](https://circleci.com/gh/jmcvetta/napping)      |
+| Coveralls | [![Coveralls](https://img.shields.io/coveralls/jmcvetta/napping/master.svg)](https://coveralls.io/r/jmcvetta/napping) |
+| Codecov   | [![Codecov](https://img.shields.io/codecov/c/github/jmcvetta/napping.svg)](https://codecov.io/gh/jmcvetta/napping)    |
 
 Used by, and developed in conjunction with, [Neoism][].
 
