@@ -6,11 +6,10 @@
 package napping
 
 import (
+	"bytes"
 	"crypto/tls"
 	"encoding/base64"
 	"encoding/json"
-	"github.com/jmcvetta/randutil"
-	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -19,6 +18,9 @@ import (
 	"regexp"
 	"strings"
 	"testing"
+
+	"github.com/jmcvetta/randutil"
+	"github.com/stretchr/testify/assert"
 )
 
 func init() {
@@ -57,7 +59,7 @@ func paramHandler(t *testing.T, p url.Values, f hfunc) hfunc {
 			f(w, req)
 		}
 		q := req.URL.Query()
-		for k, _ := range p {
+		for k := range p {
 			if !assert.Equal(t, p[k], q[k]) {
 				msg := "Bad query params: " + q.Encode()
 				t.Error(msg)
@@ -114,9 +116,9 @@ func headerHandler(t *testing.T, h http.Header, f hfunc) hfunc {
 		if f != nil {
 			f(w, req)
 		}
-		for key, _ := range h {
-			expected := h.Get(key)
-			actual := req.Header.Get(key)
+		for k := range h {
+			expected := h.Get(k)
+			actual := req.Header.Get(k)
 			if expected != actual {
 				t.Error("Missing/bad header")
 			}
@@ -169,7 +171,7 @@ func TestRequest(t *testing.T) {
 		//
 		if test.params {
 			p := Params{key: value}.AsUrlValues()
-			f := paramHandler(t, p, nil)
+			f = paramHandler(t, p, nil)
 			allHF = paramHandler(t, p, allHF)
 			r = baseReq
 			r.Params = &p
@@ -208,7 +210,7 @@ func TestRequest(t *testing.T) {
 }
 
 func TestInvalidTLS(t *testing.T) {
-	srv := httptest.NewTLSServer(http.HandlerFunc(HandleInvalidTLS))
+	srv := httptest.NewTLSServer(http.HandlerFunc(handleEmptyOK))
 	defer srv.Close()
 	// The first request, which is supposed to fail, will print something similar to
 	// "20:45:27 server.go:2161: http: TLS handshake error from 127.0.0.1:56293: remote error: bad certificate" to the console.
@@ -239,12 +241,12 @@ func TestInvalidTLS(t *testing.T) {
 		t.Fatal(err2)
 	}
 	if resp2.Status() != http.StatusOK {
-		t.Fatalf("Expected status %d but got %v\n", http.StatusOK, resp2.Status())
+		t.Fatalf("Expected status %d but got %d", http.StatusOK, resp2.Status())
 	}
 }
 
 func TestBasicAuth(t *testing.T) {
-	srv := httptest.NewServer(http.HandlerFunc(HandleGetBasicAuth))
+	srv := httptest.NewServer(http.HandlerFunc(handleGetBasicAuth))
 	defer srv.Close()
 	s := Session{}
 	r := Request{
@@ -257,18 +259,18 @@ func TestBasicAuth(t *testing.T) {
 		t.Fatal(err)
 	}
 	if resp.Status() != 200 {
-		t.Fatalf("Expected status 200 but got %v\n", resp.Status())
+		t.Fatalf("Expected status 200 but got %d", resp.Status())
 	}
 }
 
 func TestBasicUrlAuth(t *testing.T) {
-	srv := httptest.NewServer(http.HandlerFunc(HandleGetBasicAuth))
+	srv := httptest.NewServer(http.HandlerFunc(handleGetBasicAuth))
 	defer srv.Close()
 	s := Session{}
-	testUrl, _ := url.Parse("http://" + srv.Listener.Addr().String())
-	testUrl.User = url.UserPassword("jtkirk", "Beam me up, Scotty!")
+	testURL, _ := url.Parse("http://" + srv.Listener.Addr().String())
+	testURL.User = url.UserPassword("jtkirk", "Beam me up, Scotty!")
 	r := Request{
-		Url:    testUrl.String(),
+		Url:    testURL.String(),
 		Method: "GET",
 	}
 	resp, err := s.Send(&r)
@@ -276,7 +278,45 @@ func TestBasicUrlAuth(t *testing.T) {
 		t.Fatal(err)
 	}
 	if resp.Status() != 200 {
-		t.Fatalf("Expected status 200 but got %v\n", resp.Status())
+		t.Fatalf("Expected status 200 but got %d", resp.Status())
+	}
+}
+
+func TestRawPayload(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(handleEmptyOK))
+	defer srv.Close()
+	s := Session{}
+	testURL, _ := url.Parse("http://" + srv.Listener.Addr().String())
+	r := Request{
+		Url:        testURL.String(),
+		Method:     "POST",
+		Payload:    bytes.NewBuffer([]byte("foobar")),
+		RawPayload: true,
+	}
+	resp, err := s.Send(&r)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resp.Status() != 200 {
+		t.Fatalf("Expected status 200 but got %d", resp.Status())
+	}
+}
+
+func TestRawPayloadFail(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(handleEmptyOK))
+	defer srv.Close()
+	s := Session{}
+	testURL, _ := url.Parse("http://" + srv.Listener.Addr().String())
+	j := struct{}{}
+	r := Request{
+		Url:        testURL.String(),
+		Method:     "POST",
+		Payload:    &j,
+		RawPayload: true,
+	}
+	_, err := s.Send(&r)
+	if err == nil {
+		t.Fatal("Expect invalid raw payload type")
 	}
 }
 
@@ -288,21 +328,21 @@ func TestErrMsg(t *testing.T) {}
 
 func TestStatus(t *testing.T) {}
 
-func TestUnmarshall(t *testing.T) {}
+func TestUnmarshal(t *testing.T) {}
 
-// func TestUnmarshallFail() {}
+func TestUnmarshalFail(t *testing.T) {}
 
-func HandleInvalidTLS(w http.ResponseWriter, req *http.Request) {
+func handleEmptyOK(w http.ResponseWriter, req *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func HandleGetBasicAuth(w http.ResponseWriter, req *http.Request) {
+func handleGetBasicAuth(w http.ResponseWriter, req *http.Request) {
 	authRegex := regexp.MustCompile(`[Bb]asic (?P<encoded>\S+)`)
 	str := req.Header.Get("Authorization")
 	matches := authRegex.FindStringSubmatch(str)
 	if len(matches) != 2 {
 		msg := "Regex doesn't match"
-		log.Println(msg)
+		log.Print(msg)
 		http.Error(w, msg, http.StatusBadRequest)
 		return
 	}
@@ -310,14 +350,14 @@ func HandleGetBasicAuth(w http.ResponseWriter, req *http.Request) {
 	b, err := base64.URLEncoding.DecodeString(encoded)
 	if err != nil {
 		msg := "Base64 decode failed"
-		log.Println(msg)
+		log.Print(msg)
 		http.Error(w, msg, http.StatusBadRequest)
 		return
 	}
 	parts := strings.Split(string(b), ":")
 	if len(parts) != 2 {
 		msg := "String split failed"
-		log.Println(msg)
+		log.Print(msg)
 		http.Error(w, msg, http.StatusBadRequest)
 		return
 	}
